@@ -608,6 +608,14 @@ public class Tournament implements Serializable {
     public int getCurrentPlayer() {
         return this.currentPlayer;
     }
+
+    public List<Player> getPlayers() {
+        return this.players;
+    }
+
+    public String getHandNum() {
+        return Integer.toString(this.handnum);
+    }
 }
 
 

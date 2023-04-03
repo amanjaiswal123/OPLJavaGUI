@@ -32,7 +32,7 @@ public class hand extends AppCompatActivity {
         handTiles = new ArrayList<>();
         Intent intent = getIntent();
         mainController = (Controller) intent.getSerializableExtra("controller");
-        List<Player> players = mainController.tournament.players;
+        List<Player> players = mainController.getTournament().getPlayers();
 
         for (Player player: players){
             for (Tile tile: player.getBoneyard()){
@@ -40,14 +40,14 @@ public class hand extends AppCompatActivity {
             }
         }
 
-        List<Tile> cPlayerHand = players.get(mainController.tournament.getCurrentPlayer()).getHand();
+        List<Tile> cPlayerHand = players.get(mainController.getTournament().getCurrentPlayer()).getHand();
         for (Tile tile: cPlayerHand){
             handTiles.add(tile);
         }
 
         // Initialize the adapters
-        stackSection1Adapter = new DominoAdapter(this, stackTiles);
-        handAdapter = new DominoAdapter(this, handTiles);
+        stackSection1Adapter = new DominoAdapter(this, stackTiles, mainController, true);
+        handAdapter = new DominoAdapter(this, handTiles, mainController, false);
 
         // Set the RecyclerViews' layout managers
         stackSection1RecyclerView.setLayoutManager(new GridLayoutManager(this, 3));

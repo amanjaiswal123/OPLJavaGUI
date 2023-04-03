@@ -4,7 +4,10 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
@@ -14,9 +17,15 @@ public class DominoAdapter extends RecyclerView.Adapter<DominoAdapter.DominoView
     private List<Tile> tiles;
     private Context context;
 
-    public DominoAdapter(Context context, List<Tile> tiles) {
+    private Controller mainController;
+
+    private boolean stack;
+
+    public DominoAdapter(Context context, List<Tile> tiles, Controller mainController, boolean stack) {
         this.context = context;
         this.tiles = tiles;
+        this.mainController = mainController;
+        this.stack = stack;
     }
 
     @NonNull
@@ -29,9 +38,9 @@ public class DominoAdapter extends RecyclerView.Adapter<DominoAdapter.DominoView
     @Override
     public void onBindViewHolder(@NonNull DominoViewHolder holder, int position) {
         Tile tile = tiles.get(position);
-        holder.leftNumber.setText(String.valueOf(tile.getLeft()));
-        holder.rightNumber.setText(String.valueOf(tile.getRight()));
+        holder.dominoButton.setText(String.format("%s%d\n%s%d", tile.getColor(), tile.getLeft(), tile.getColor(), tile.getRight()));
     }
+
 
     @Override
     public int getItemCount() {
@@ -39,12 +48,31 @@ public class DominoAdapter extends RecyclerView.Adapter<DominoAdapter.DominoView
     }
 
     class DominoViewHolder extends RecyclerView.ViewHolder {
-        TextView leftNumber, rightNumber;
+        Button dominoButton;
 
         DominoViewHolder(@NonNull View itemView) {
             super(itemView);
-            leftNumber = itemView.findViewById(R.id.left_number);
-            rightNumber = itemView.findViewById(R.id.right_number);
+            dominoButton = itemView.findViewById(R.id.domino_button);
+            dominoButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Animation animation = new AlphaAnimation(1, 0.2f);
+                    animation.setDuration(300);
+                    animation.setInterpolator(new LinearInterpolator());
+                    animation.setRepeatCount(2);
+                    animation.setRepeatMode(Animation.REVERSE);
+                    view.startAnimation(animation);
+                    int position = getAdapterPosition();
+                    Tile clickedTile = tiles.get(position);
+                    System.out.println("Clicked tile: " + clickedTile);
+                    if (stack){
+                        mainController.selectStackTile(clickedTile);
+                    }
+                    else{
+                        mainController.selectHandTile(clickedTile);
+                    }
+                }
+            });
         }
     }
 }

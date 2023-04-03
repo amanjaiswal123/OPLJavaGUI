@@ -113,4 +113,8 @@ public class Tile implements Serializable {
             super.finalize();
         }
     }
+
+    public Object getColor() {
+        return this.player.getColor();
+    }
 }
