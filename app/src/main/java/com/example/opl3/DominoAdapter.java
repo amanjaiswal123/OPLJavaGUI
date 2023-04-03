@@ -22,7 +22,7 @@ public class DominoAdapter extends RecyclerView.Adapter<DominoAdapter.DominoView
     @NonNull
     @Override
     public DominoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(context).inflate(R.drawable.domino_border, parent, false);
+        View itemView = LayoutInflater.from(context).inflate(R.layout.domino_border, parent, false);
         return new DominoViewHolder(itemView);
     }
 
