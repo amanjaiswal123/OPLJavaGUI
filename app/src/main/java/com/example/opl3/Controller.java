@@ -1,16 +1,17 @@
 package com.example.opl3;
 
 
-public class Controller {
+import java.io.Serializable;
+
+public class Controller implements Serializable {
     Tournament tournament;
-    MainActivity activity;
-    public Controller(MainActivity activity_){
-        activity = activity_;
+    public Controller(){
         tournament = new Tournament(this);
     }
 
-    public void startGame(){
-        tournament.start_new_tournament();
+    public int startGame(){
+        return tournament.start_new_tournament();
+
     }
 
     public void newHand(){

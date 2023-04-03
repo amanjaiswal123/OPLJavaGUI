@@ -15,13 +15,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mainController = new Controller(this);
+        mainController = new Controller();
         this.setContentView(R.layout.activity_main);
         button = findViewById(R.id.imageButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainController.startGame();
+                String handnum = String.valueOf(mainController.startGame());
+                Intent intent = new Intent(getApplicationContext(), hand.class);
+                intent.putExtra("handNum", handnum);
+                intent.putExtra("controller", mainController);
+                startActivity(intent);
             }
         });
     }

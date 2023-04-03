@@ -1,8 +1,9 @@
 package com.example.opl3;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Player {
+public class Player implements Serializable {
     // The player class is used to create a player object. The player object is used to store the player's data including
     // their player id, color, boneyard, hand, stacks, score, and rounds won.
     private String playerID;
@@ -13,7 +14,6 @@ public class Player {
     private int score;
     private int roundsWon;
     private int handOffset;
-    private Scanner scanner;
 
     public Player() {
         // The player's ID used to identify the player
@@ -32,7 +32,6 @@ public class Player {
         this.roundsWon = 0;
         // Used to scroll through the player's hand in gui.hand_listener
         this.handOffset = 0;
-        this.scanner = new Scanner(System.in);
     }
 
     // Getters and setters for the class members
@@ -211,27 +210,12 @@ public class Player {
         return validMove;
     }
 
-    public String savePlayer() {
-        String string = "Human:\n";
-        string += "   Stacks: ";
-        for (Tile tile : stack) {
-            string += tile.toString().substring(1, 4) + " ";
-        }
-        string += "\n";
-        string += "   Boneyard: ";
-        for (Tile tile : boneyard) {
-            string += tile.toString().substring(1, 4) + " ";
-        }
-        string += "\n";
-        string += "   Hand: ";
-        for (Tile tile : hand) {
-            string += tile.toString().substring(1, 4) + " ";
-        }
-        string += "\n";
-        string += "   Score: " + score + "\n";
-        string += "   Rounds Won: " + roundsWon + "\n";
+    public List<Object> getValidMove(List<Player> players, List<Object> recMove) {
+        return new ArrayList<>();
+    }
 
-        return string;
+    public String savePlayer(){
+        return "";
     }
 
 
@@ -282,7 +266,8 @@ public class Player {
 
         while (true) {
             System.out.print(prompt);
-            input = this.scanner.nextLine().trim().toUpperCase();
+            //input = this.scanner.nextLine().trim().toUpperCase();
+            input = validInputs.get(0);
             //capitlize all elements in validInputs
             for (int i = 0; i < validInputs.size(); i++) {
                 validInputs.set(i, validInputs.get(i).toUpperCase());
@@ -370,34 +355,7 @@ public class Player {
         }
     }
 
-    public List<Object> getValidMove(List<Player> players, List<Object> recMove) {
-        boolean askUserRecMove = this.getValidInput("\nWould you like a recommended move? (Y/N): ", Arrays.asList("Y", "N")).equals("Y");
-        if (recMove.get(0).equals("pass") && askUserRecMove) {
-            System.out.println("There are no valid moves. You must pass.");
-        }
-        if (askUserRecMove && !recMove.get(0).equals("pass")) {
-            System.out.println("The Best Move is " + recMove.get(0) + " on " + recMove.get(1) + " because it has a difference of " + recMove.get(2) + " which is the lowest difference move on an opponent's stack.\n");
-        }
-        List<Object> move = this.getMove(players, recMove);
-        if (!move.get(0).equals("pass")) {
-            Tile handTile = (Tile) move.get(0);
-            Tile stackTile = (Tile) move.get(1);
-            if (checkValidMove(handTile, stackTile)) {
-                return move;
-            } else {
-                System.out.println("Invalid move. Please try again.");
-                return this.getValidMove(players, recMove);
-            }
-        }
-        else{
-            if (recMove.get(0).equals("pass")) {
-                return move;
-            } else {
-                System.out.println("Cannot Pass, valid moves available.");
-                return this.getValidMove(players, recMove);
-            }
-        }
-    }
+
 
     public int scoreHand() {
         int sum = 0;

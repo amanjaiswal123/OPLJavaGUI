@@ -1,11 +1,10 @@
 package com.example.opl3;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class computerPlayer extends Player {
-    public computerPlayer() {
-        super();
-    }
+public class computerPlayer extends Player implements Serializable {
+    public computerPlayer(){super();}
     @Override
     public List<Object> getValidMove(List<Player> players, List<Object> recMove) {
         if (recMove.get(0).equals("pass")) {

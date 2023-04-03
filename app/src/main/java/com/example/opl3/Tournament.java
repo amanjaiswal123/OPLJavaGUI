@@ -5,22 +5,23 @@ import java.util.*;
 
 import static java.lang.System.exit;
 
-public class Tournament {
-    private Scanner scanner;
+public class Tournament implements Serializable {
     private Controller mainController;
 
     List<Player> players;
+    private int handnum;
+    private int currentPlayer;
 
     public Tournament(Controller mainController_) {
         mainController = mainController_;
         this.players = new ArrayList<>();
-        this.scanner = new Scanner(System.in);
+        currentPlayer = 0;
     }
 
-    public void start_new_tournament() {
+    public int start_new_tournament() {
         // Create a new player object
         this.players = new ArrayList<>();
-        Player humanPlayer = new Player();
+        Player humanPlayer = new humanPlayer();
         humanPlayer.createNewPlayer("Human", "B");
         Player computerPlayer = new computerPlayer();
         computerPlayer.createNewPlayer("Computer", "W");
@@ -28,8 +29,8 @@ public class Tournament {
         this.players.add(humanPlayer);
         this.players.add(computerPlayer);
         this.determineOrder();
-        this.play_round(1);
-        this.play_again();
+        this.handnum = 1;
+        return handnum;
     }
 
 
@@ -55,8 +56,6 @@ public class Tournament {
         computerPlayer.setRoundsWon(computerRoundWins);
         humanPlayer.setRoundsWon(humanRoundWins);
         this.determineOrder();
-        this.play_round(1);
-        this.play_again();
     }
 
     public String getValidInput(String prompt, List<String> validInputs) {
@@ -64,8 +63,8 @@ public class Tournament {
 
         while (true) {
             System.out.print(prompt);
-            input = this.scanner.nextLine().trim().toUpperCase();
-
+            //input = this.scanner.nextLine().trim().toUpperCase();
+            input = "";
             if (validInputs.contains(input)) {
                 break;
             } else {
@@ -165,7 +164,7 @@ public class Tournament {
         }
     }
 
-    public void play_round(int handnum) {
+    public void play_round() {
         if (handnum == 1) {
             if (players.get(0).getHand().size() == 1 && players.get(1).getHand().size() == 1) {
                 for (Player currentPlayer : players) {
@@ -174,9 +173,9 @@ public class Tournament {
             }
             System.out.println("\nHand Number: " + handnum + "\n");
             playHand();
-            handnum += 1;
+            this.handnum += 1;
         }
-        if (handnum == 2) {
+        else if (handnum == 2) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
                     currentPlayer.moveFromBoneyardToHandN(6);
@@ -186,7 +185,7 @@ public class Tournament {
             playHand();
             handnum += 1;
         }
-        if (handnum == 3) {
+        else if (handnum == 3) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
                     currentPlayer.moveFromBoneyardToHandN(6);
@@ -196,7 +195,7 @@ public class Tournament {
             playHand();
             handnum += 1;
         }
-        if (handnum == 4) {
+        else if (handnum == 4) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
                     currentPlayer.moveFromBoneyardToHandN(4);
@@ -207,6 +206,7 @@ public class Tournament {
             handnum += 1;
         } else {
             System.out.println("\nRound Finished Scoring Round\n");
+            //Return Score to View
             this.scoreRound();
         }
     }
@@ -259,7 +259,6 @@ public class Tournament {
             for (Player currentPlayer : players) {
                 currentPlayer.savePlayer();
                 System.out.println("Player " + currentPlayer.getPlayerID() + "'s turn:\n");
-
                 currentPlayer.displayHand();
                 System.out.println();
                 this.displayAllStacks();
@@ -302,8 +301,9 @@ public class Tournament {
 
                     while (true) {
                         System.out.print("Please Enter a filename: ");
-                        filename = this.scanner.nextLine().trim();
-                        filename = "Seralize/"+filename+".txt";
+                        //filename = this.scanner.nextLine().trim();
+                        filename = "";
+                        filename = "Seralize/" + filename + ".txt";
                         if (this.isFileTaken(filename)) {
                             System.out.println("The Filename is already taken, please enter a diffrent one. Check the Seralize Directory \n");
                         } else {
@@ -331,19 +331,19 @@ public class Tournament {
             }
         }
 
-          System.out.println("\nHand Over");
-          System.out.println("Final Hands:");
-          this.displayAllHands();
-          System.out.println("Final Stacks:");
-          this.displayAllStacks();
-          // Score the hand
-          System.out.println("\nHand Scores:");
-          // Get the scores for the hand
-          Map<String, Integer> handScores = this.scoreHand();
-    //     // Get the scores for the stacks
-         Map<String, Integer> stackScores = scoreStacks();
-    // Create a dictionary to hold the final scores of the players
-         Map<String, Integer> finalScores = new HashMap<>();
+        System.out.println("\nHand Over");
+        System.out.println("Final Hands:");
+        this.displayAllHands();
+        System.out.println("Final Stacks:");
+        this.displayAllStacks();
+        // Score the hand
+        System.out.println("\nHand Scores:");
+        // Get the scores for the hand
+        Map<String, Integer> handScores = this.scoreHand();
+        //     // Get the scores for the stacks
+        Map<String, Integer> stackScores = scoreStacks();
+        // Create a dictionary to hold the final scores of the players
+        Map<String, Integer> finalScores = new HashMap<>();
         for (Player currentPlayer : players) {
             int score = stackScores.get(currentPlayer.getPlayerID()) - handScores.get(currentPlayer.getPlayerID());
             finalScores.put(currentPlayer.getPlayerID(), score);
@@ -351,9 +351,9 @@ public class Tournament {
             System.out.println("Player " + currentPlayer.getPlayerID() + " scored " + score + " points");
         }
         System.out.println("\nCumulative Scores:");
-      for (Player currentPlayer : players) {
-          System.out.println("Player " + currentPlayer.getPlayerID() + ": " + currentPlayer.getScore());
-         currentPlayer.clearHand();
+        for (Player currentPlayer : players) {
+            System.out.println("Player " + currentPlayer.getPlayerID() + ": " + currentPlayer.getScore());
+            currentPlayer.getHand().clear();
         }
     }
 
@@ -582,7 +582,7 @@ public class Tournament {
             c_boneyard_converted = new ArrayList<>();
             c_stacks_converted = new ArrayList<>();
         }
-        int handnum = 4-(humanPlayer.getBoneyard().size()/6);
+        this.handnum = 4-(humanPlayer.getBoneyard().size()/6);
         if (handnum == 0){
             for (Player c_player : players){
                 c_player.shuffleBoneyard();
@@ -603,8 +603,10 @@ public class Tournament {
             players.add(computerPlayer_);
             this.determineOrder();
         }
-        this.play_round(handnum);
-        this.play_again();
+    }
+
+    public int getCurrentPlayer() {
+        return this.currentPlayer;
     }
 }
 

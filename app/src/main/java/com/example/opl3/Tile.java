@@ -1,6 +1,8 @@
 package com.example.opl3;
 
-public class Tile {
+import java.io.Serializable;
+
+public class Tile implements Serializable {
     // The tile class stores the value of the left and right side of a tile as well as overriding some basic operators
     // to make it easier to work with. It takes in DisplayTile which adds attributes and methods to the tile class to
     // make it easier to display it on the game board.
@@ -100,5 +102,15 @@ public class Tile {
 
     public Player getPlayer() {
         return this.player;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            // do any necessary cleanup here
+            // for example, release any external resources
+        } finally {
+            super.finalize();
+        }
     }
 }
