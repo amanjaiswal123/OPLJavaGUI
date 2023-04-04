@@ -1,8 +1,13 @@
 package com.example.opl3;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 
-public class Tile implements Serializable {
+public class Tile implements Parcelable {
     // The tile class stores the value of the left and right side of a tile as well as overriding some basic operators
     // to make it easier to work with. It takes in DisplayTile which adds attributes and methods to the tile class to
     // make it easier to display it on the game board.
@@ -23,6 +28,25 @@ public class Tile implements Serializable {
         // If both sides of the tile are the same, the tile is a double
         this.doubleTile = this.left == this.right;
     }
+
+    protected Tile(Parcel in) {
+        left = in.readInt();
+        right = in.readInt();
+        selected = in.readByte() != 0;
+        doubleTile = in.readByte() != 0;
+    }
+
+    public static final Creator<Tile> CREATOR = new Creator<Tile>() {
+        @Override
+        public Tile createFromParcel(Parcel in) {
+            return new Tile(in);
+        }
+
+        @Override
+        public Tile[] newArray(int size) {
+            return new Tile[size];
+        }
+    };
 
     public void setSelected(boolean selected) {
         this.selected = selected;
@@ -116,5 +140,19 @@ public class Tile implements Serializable {
 
     public Object getColor() {
         return this.player.getColor();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(this.left);
+        dest.writeInt(this.right);
+        dest.writeParcelable(this.player, flags);
+        dest.writeByte(this.selected ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.doubleTile ? (byte) 1 : (byte) 0);
     }
 }

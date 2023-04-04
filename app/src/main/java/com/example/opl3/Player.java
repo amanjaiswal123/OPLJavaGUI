@@ -1,9 +1,14 @@
 package com.example.opl3;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.*;
 
-public class Player implements Serializable {
+public class Player implements Parcelable {
     // The player class is used to create a player object. The player object is used to store the player's data including
     // their player id, color, boneyard, hand, stacks, score, and rounds won.
     private String playerID;
@@ -33,6 +38,29 @@ public class Player implements Serializable {
         // Used to scroll through the player's hand in gui.hand_listener
         this.handOffset = 0;
     }
+
+    protected Player(Parcel in) {
+        playerID = in.readString();
+        color = in.readString();
+        boneyard = in.createTypedArrayList(Tile.CREATOR);
+        hand = in.createTypedArrayList(Tile.CREATOR);
+        stack = in.createTypedArrayList(Tile.CREATOR);
+        score = in.readInt();
+        roundsWon = in.readInt();
+        handOffset = in.readInt();
+    }
+
+    public static final Creator<Player> CREATOR = new Creator<Player>() {
+        @Override
+        public Player createFromParcel(Parcel in) {
+            return new Player(in);
+        }
+
+        @Override
+        public Player[] newArray(int size) {
+            return new Player[size];
+        }
+    };
 
     // Getters and setters for the class members
     public String getPlayerID() {
@@ -210,7 +238,7 @@ public class Player implements Serializable {
         return validMove;
     }
 
-    public List<Object> getValidMove(List<Player> players, List<Object> recMove) {
+    public List<Object> getValidMove(List<Player> players, List<Object> recMove, Controller mainController) {
         return new ArrayList<>();
     }
 
@@ -303,7 +331,7 @@ public class Player implements Serializable {
         }
     }
 
-    public List<Object> getMove(List<Player> players, List<Object> recMove) {
+    public List<Object> getMove(List<Player> players, List<Object> recMove, Controller mainController) {
         List<String> validHandInputs = new ArrayList<>();
         if (recMove.get(0).equals("pass")) {
             validHandInputs.add("pass");
@@ -313,17 +341,26 @@ public class Player implements Serializable {
             for (Tile handTile : hand) {
                 validHandInputs.add(handTile.toString().substring(1, 4));
             }
-            String handTileSTR = this.getValidInput("Enter a tile from your hand to play: ", validHandInputs);
+            mainController.resetHandSelected();
+            while (mainController.getHandSelected() == null){
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            String handTileSTR = mainController.getHandSelected().toString();
+            mainController.resetHandSelected();
             Tile handTile = null;
             for (Tile c_handTile : hand) {
-                if (c_handTile.toString().substring(1, 4).equals(handTileSTR)) {
+                if (c_handTile.toString().equals(handTileSTR)) {
                     handTile = c_handTile;
                     break;
                 }
             }
             if (handTile == null) {
                 System.out.println("Invalid input. Please enter a tile from the hand");
-                return this.getMove(players, recMove);
+                return this.getMove(players, recMove, mainController);
             }
             List<String> ValidStackInputs = new ArrayList<>();
             for (Player currentPlayer : players) {
@@ -331,11 +368,20 @@ public class Player implements Serializable {
                     ValidStackInputs.add(stackTile.toString().substring(1, 4));
                 }
             }
-            String stackTileSTR = this.getValidInput("Enter a tile from the stack to play on: ", ValidStackInputs);
+            mainController.resetStackSelected();
+            while (mainController.getStackSelected() == null){
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            String stackTileSTR = mainController.getStackSelected().toString();
+            mainController.resetStackSelected();
             Tile stackTile = null;
             for (Player currentPlayer : players) {
                 for (Tile c_stackTile : currentPlayer.getStack()) {
-                    if (c_stackTile.toString().substring(1, 4).equals(stackTileSTR)) {
+                    if (c_stackTile.toString().equals(stackTileSTR)) {
                         stackTile = c_stackTile;
                         break;
                     }
@@ -346,7 +392,7 @@ public class Player implements Serializable {
             }
             if (stackTile == null) {
                 System.out.println("Invalid input. Please enter a tile from the stack.");
-                return this.getMove(players, recMove);
+                return this.getMove(players, recMove, mainController);
             }
             List<Object> move = new ArrayList<>();
             move.add(handTile);
@@ -387,5 +433,25 @@ public class Player implements Serializable {
 
     public void playTurn(){
 
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        List<Tile> stack = getStack();
+        Parcelable[] parcelableArray = stack.toArray(new Parcelable[stack.size()]);
+        dest.writeParcelableArray(parcelableArray, flags);
+        List <Tile> boneyard = getBoneyard();
+        Parcelable[] parcelableArray2 = boneyard.toArray(new Parcelable[boneyard.size()]);
+        dest.writeParcelableArray(parcelableArray2, flags);
+        List <Tile> hand = getHand();
+        Parcelable[] parcelableArray3 = hand.toArray(new Parcelable[hand.size()]);
+        dest.writeParcelableArray(parcelableArray3, flags);
+        dest.writeInt(getScore());
+        dest.writeInt(getRoundsWon());
     }
 }

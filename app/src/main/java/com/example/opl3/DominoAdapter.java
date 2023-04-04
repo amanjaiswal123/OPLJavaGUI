@@ -47,6 +47,10 @@ public class DominoAdapter extends RecyclerView.Adapter<DominoAdapter.DominoView
         return tiles.size();
     }
 
+    public void setTiles(List<Tile> tiles) {
+        this.tiles = tiles;
+    }
+
     class DominoViewHolder extends RecyclerView.ViewHolder {
         Button dominoButton;
 

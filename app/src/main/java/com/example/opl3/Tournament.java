@@ -5,20 +5,23 @@ import java.util.*;
 
 import static java.lang.System.exit;
 
-public class Tournament implements Serializable {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
+public class Tournament implements Parcelable {
     private Controller mainController;
 
     List<Player> players;
-    private int handnum;
-    private int currentPlayer;
+    private Player currentPlayer;
 
     public Tournament(Controller mainController_) {
         mainController = mainController_;
         this.players = new ArrayList<>();
-        currentPlayer = 0;
     }
 
-    public int start_new_tournament() {
+    public void start_new_tournament() {
         // Create a new player object
         this.players = new ArrayList<>();
         Player humanPlayer = new humanPlayer();
@@ -29,8 +32,8 @@ public class Tournament implements Serializable {
         this.players.add(humanPlayer);
         this.players.add(computerPlayer);
         this.determineOrder();
-        this.handnum = 1;
-        return handnum;
+        this.play_round(1);
+        this.play_again();
     }
 
 
@@ -164,7 +167,7 @@ public class Tournament implements Serializable {
         }
     }
 
-    public void play_round() {
+    public void play_round(int handnum) {
         if (handnum == 1) {
             if (players.get(0).getHand().size() == 1 && players.get(1).getHand().size() == 1) {
                 for (Player currentPlayer : players) {
@@ -173,9 +176,9 @@ public class Tournament implements Serializable {
             }
             System.out.println("\nHand Number: " + handnum + "\n");
             playHand();
-            this.handnum += 1;
+            handnum += 1;
         }
-        else if (handnum == 2) {
+        if (handnum == 2) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
                     currentPlayer.moveFromBoneyardToHandN(6);
@@ -185,7 +188,7 @@ public class Tournament implements Serializable {
             playHand();
             handnum += 1;
         }
-        else if (handnum == 3) {
+        if (handnum == 3) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
                     currentPlayer.moveFromBoneyardToHandN(6);
@@ -195,7 +198,7 @@ public class Tournament implements Serializable {
             playHand();
             handnum += 1;
         }
-        else if (handnum == 4) {
+        if (handnum == 4) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
                     currentPlayer.moveFromBoneyardToHandN(4);
@@ -257,13 +260,15 @@ public class Tournament implements Serializable {
         }
         while (consecutivePasses < players.size() && !allEmptyHands) {
             for (Player currentPlayer : players) {
+                this.currentPlayer = currentPlayer;
+                mainController.notifyNewTurn();
                 currentPlayer.savePlayer();
                 System.out.println("Player " + currentPlayer.getPlayerID() + "'s turn:\n");
                 currentPlayer.displayHand();
                 System.out.println();
                 this.displayAllStacks();
                 List<Object> recMove = currentPlayer.recommendMove(players);
-                List<Object> move = currentPlayer.getValidMove(players, recMove);
+                List<Object> move = currentPlayer.getValidMove(players, recMove, mainController);
                 if (move.get(0) != "pass") {
                     handTile = (Tile) move.get(0);
                     Tile stackTile = (Tile) move.get(1);
@@ -330,7 +335,6 @@ public class Tournament implements Serializable {
                 }
             }
         }
-
         System.out.println("\nHand Over");
         System.out.println("Final Hands:");
         this.displayAllHands();
@@ -350,6 +354,7 @@ public class Tournament implements Serializable {
             currentPlayer.addScore(score);
             System.out.println("Player " + currentPlayer.getPlayerID() + " scored " + score + " points");
         }
+        mainController.notifyEndHand(finalScores);
         System.out.println("\nCumulative Scores:");
         for (Player currentPlayer : players) {
             System.out.println("Player " + currentPlayer.getPlayerID() + ": " + currentPlayer.getScore());
@@ -582,7 +587,7 @@ public class Tournament implements Serializable {
             c_boneyard_converted = new ArrayList<>();
             c_stacks_converted = new ArrayList<>();
         }
-        this.handnum = 4-(humanPlayer.getBoneyard().size()/6);
+        int handnum = 4-(humanPlayer.getBoneyard().size()/6);
         if (handnum == 0){
             for (Player c_player : players){
                 c_player.shuffleBoneyard();
@@ -605,7 +610,7 @@ public class Tournament implements Serializable {
         }
     }
 
-    public int getCurrentPlayer() {
+    public Player getCurrentPlayer() {
         return this.currentPlayer;
     }
 
@@ -613,8 +618,17 @@ public class Tournament implements Serializable {
         return this.players;
     }
 
-    public String getHandNum() {
-        return Integer.toString(this.handnum);
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        Parcelable[] parcelableArray = players.toArray(new Parcelable[players.size()]);
+        dest.writeParcelableArray(parcelableArray, flags);
+        dest.writeParcelable(currentPlayer, flags);
+        dest.writeParcelable(mainController, flags);
     }
 }
 
