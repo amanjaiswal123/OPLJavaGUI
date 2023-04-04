@@ -10,10 +10,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class hand extends AppCompatActivity {
     private RecyclerView stackSection1RecyclerView, handRecyclerView;
@@ -25,14 +30,30 @@ public class hand extends AppCompatActivity {
 
     private Player cPlayer;
 
+    static hand INSTANCE;
+
+    private TextView messageBoard;
+
+    private LinearLayout boardDisplay;
+
+    private LinearLayout table_display;
+
+
+    private FrameLayout overallLayout;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mainController = new Controller(this);
-        mainController.startGame();
+
+
         setContentView(R.layout.domino_layout); // Change this to the correct layout file for the hand activity
+        overallLayout = findViewById(R.id.overall_layout);
+        messageBoard = findViewById(R.id.message_board);
+        boardDisplay = findViewById(R.id.board_display);
+        boardDisplay.setVisibility(View.VISIBLE);
+        table_display = findViewById(R.id.table_display);
+        table_display.setVisibility(View.INVISIBLE);
 
         // Initialize the RecyclerViews
         stackSection1RecyclerView = findViewById(R.id.stack_section_1_recycler_view);
@@ -42,6 +63,9 @@ public class hand extends AppCompatActivity {
         stackTiles = new ArrayList<>();
         handTiles = new ArrayList<>();
         Intent intent = getIntent();
+        mainController = new Controller();
+        mainController.setActivity(this);
+        mainController.startGame();
         List<Player> players = mainController.getTournament().getPlayers();
 
         for (Player player : players) {
@@ -70,8 +94,6 @@ public class hand extends AppCompatActivity {
         Log.d("HAND_ACTIVITY", "stackTiles size: " + stackTiles.size());
         Log.d("HAND_ACTIVITY", "handTiles size: " + handTiles.size());
 
-        List<Tile> stackTiles = Collections.singletonList(cPlayer.getStack().get(0));
-
 
 
             // Add your tiles to the stackTiles and handTiles lists, then call the adapters' notifyDataSetChanged() method
@@ -79,6 +101,16 @@ public class hand extends AppCompatActivity {
             // stackSection1Adapter.notifyDataSetChanged();
 
             // handTiles.add(...);
+    }
+
+    public static hand getActivityInstance()
+    {
+        return INSTANCE;
+    }
+
+    public Controller getData()
+    {
+        return this.mainController;
     }
 
     public void setStackTiles(List<Tile> stackTiles) {
@@ -89,22 +121,11 @@ public class hand extends AppCompatActivity {
         this.handTiles = handTiles;
     }
 
-    private class MyTask extends AsyncTask<Void, Void, String> {
-        @Override
-        protected String doInBackground(Void... params) {
-            while (true){
-                if (mainController.getTournament().getCurrentPlayer() != cPlayer){
-                    break;
-                }
-            }
-            return "result";
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            // update UI here with the result
-        }
+    public void setMessageBoard(String message) {
+        messageBoard.setText(message);
     }
+
+
 
 
     //Get stackAdapter
@@ -116,4 +137,43 @@ public class hand extends AppCompatActivity {
         return handAdapter;
     }
 
+    public void hideBoardDisplay(){
+        boardDisplay.setVisibility(View.INVISIBLE);
+    }
+
+    public void showBoardDisplay(){
+        boardDisplay.setVisibility(View.VISIBLE);
+    }
+
+    public void showScoreDisplay(){
+        table_display.setVisibility(View.VISIBLE);
+    }
+
+    public void hideScoreDisplay(){
+        table_display.setVisibility(View.INVISIBLE);
+    }
+
+    public void draw_scores(Map<String, Integer> finalScores, String tableTitle, String columnTitle){
+        TextView tableTitleView = findViewById(R.id.titleTextView);
+        TextView columnTitleView = findViewById(R.id.value_column);
+        tableTitleView.setText(tableTitle);
+        columnTitleView.setText(columnTitle);
+        String p1ID = finalScores.keySet().toArray()[0].toString();
+        String p2ID = finalScores.keySet().toArray()[1].toString();
+        int p1Score = finalScores.get(p1ID);
+        int p2Score = finalScores.get(p2ID);
+
+        TextView p1IDView = findViewById(R.id.player1ID);
+        TextView p2IDView = findViewById(R.id.player2ID);
+
+        TextView p1ScoreView = findViewById(R.id.player1Score);
+        TextView p2ScoreView = findViewById(R.id.player2Score);
+
+        p1IDView.setText(p1ID);
+        p2IDView.setText(p2ID);
+        p1ScoreView.setText(Integer.toString(p1Score));
+        p2ScoreView.setText(Integer.toString(p2Score));
+        hideBoardDisplay();
+        showScoreDisplay();
+    }
 }

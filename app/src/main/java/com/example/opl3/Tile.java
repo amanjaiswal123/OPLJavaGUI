@@ -151,7 +151,7 @@ public class Tile implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(this.left);
         dest.writeInt(this.right);
-        dest.writeParcelable(this.player, flags);
+        //dest.writeParcelable(this.player, flags);
         dest.writeByte(this.selected ? (byte) 1 : (byte) 0);
         dest.writeByte(this.doubleTile ? (byte) 1 : (byte) 0);
     }

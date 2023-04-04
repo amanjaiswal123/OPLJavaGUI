@@ -1,9 +1,13 @@
 package com.example.opl3;
 
 
+import static androidx.core.app.ActivityCompat.startActivityForResult;
+
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,9 +24,12 @@ public class Controller implements Parcelable {
 
     private hand activity;
 
-    public Controller(hand activity){
-        this.activity = activity;
+    public Controller(){
         tournament = new Tournament(this);
+    }
+
+    public void setActivity(hand activity){
+        this.activity = activity;
     }
 
     protected Controller(Parcel in) {
@@ -43,7 +50,7 @@ public class Controller implements Parcelable {
         }
     };
 
-    public void startGame(){
+    public void startGame() {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -52,6 +59,13 @@ public class Controller implements Parcelable {
             }
         });
         thread.start();
+       while (tournament.getCurrentPlayer() == null){
+           try {
+               Thread.sleep(100);
+           } catch (InterruptedException e) {
+               throw new RuntimeException(e);
+           }
+       }
     }
 
     public void selectStackTile(Tile tile){
@@ -89,6 +103,9 @@ public class Controller implements Parcelable {
 
 
     public void notifyNewTurn(){
+        if (activity == null){
+            return;
+        }
         List<Tile> stackTiles = new ArrayList<>();
         for (Player player : tournament.getPlayers()) {
             for (Tile tile : player.getStack()) {
@@ -116,16 +133,13 @@ public class Controller implements Parcelable {
                 new Runnable() {
                     @Override
                     public void run() {
+                        activity.showBoardDisplay();
+                        activity.hideScoreDisplay();
                         activity.getStackAdapter().notifyDataSetChanged();
                         activity.getHandAdapter().notifyDataSetChanged();
                     }
                 }
         );
-    }
-
-    public void notifyEndHand(Map<String, Integer> finalScores) {
-        Intent Intent = new Intent(activity.getApplicationContext(), drawScores.class);
-
     }
 
     @Override
@@ -139,5 +153,29 @@ public class Controller implements Parcelable {
         dest.writeParcelable(handSelected, flags);
         dest.writeParcelable(tournament, flags);
     }
+
+    public void notifyHandChange() {
+        activity.setMessageBoard("Hand " + String.valueOf(tournament.getHandNum()) + " of " + 4);
+    }
+
+    public void notifyHandEnd(Map<String, Integer> finalScores) {
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.draw_scores(finalScores, "Current Round Scores: ", "Score ");
+                    }
+                }
+        );
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void notifyRoundEnd() {
+    }
+
 }
 

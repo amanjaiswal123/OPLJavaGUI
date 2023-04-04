@@ -16,13 +16,34 @@ public class Tournament implements Parcelable {
     List<Player> players;
     private Player currentPlayer;
 
+    private int handNum;
+
     public Tournament(Controller mainController_) {
         mainController = mainController_;
         this.players = new ArrayList<>();
     }
 
+    protected Tournament(Parcel in) {
+        mainController = in.readParcelable(Controller.class.getClassLoader());
+        players = in.createTypedArrayList(Player.CREATOR);
+        currentPlayer = in.readParcelable(Player.class.getClassLoader());
+    }
+
+    public static final Creator<Tournament> CREATOR = new Creator<Tournament>() {
+        @Override
+        public Tournament createFromParcel(Parcel in) {
+            return new Tournament(in);
+        }
+
+        @Override
+        public Tournament[] newArray(int size) {
+            return new Tournament[size];
+        }
+    };
+
     public void start_new_tournament() {
         // Create a new player object
+        handNum = 1;
         this.players = new ArrayList<>();
         Player humanPlayer = new humanPlayer();
         humanPlayer.createNewPlayer("Human", "B");
@@ -32,7 +53,7 @@ public class Tournament implements Parcelable {
         this.players.add(humanPlayer);
         this.players.add(computerPlayer);
         this.determineOrder();
-        this.play_round(1);
+        this.play_round();
         this.play_again();
     }
 
@@ -167,47 +188,53 @@ public class Tournament implements Parcelable {
         }
     }
 
-    public void play_round(int handnum) {
-        if (handnum == 1) {
+    public void play_round() {
+        mainController.notifyHandChange();
+        if (handNum == 1) {
             if (players.get(0).getHand().size() == 1 && players.get(1).getHand().size() == 1) {
                 for (Player currentPlayer : players) {
                     currentPlayer.moveFromBoneyardToHandN(5);
                 }
             }
-            System.out.println("\nHand Number: " + handnum + "\n");
+            System.out.println("\nHand Number: " + String.valueOf(handNum) + "\n");
             playHand();
-            handnum += 1;
+            handNum += 1;
+            mainController.notifyHandChange();
         }
-        if (handnum == 2) {
+        if (handNum == 2) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
                     currentPlayer.moveFromBoneyardToHandN(6);
                 }
             }
-            System.out.println("\nHand Number: " + handnum + "\n");
+            System.out.println("\nHand Number: " + String.valueOf(handNum) + "\n");
             playHand();
-            handnum += 1;
+            handNum += 1;
+            mainController.notifyHandChange();
         }
-        if (handnum == 3) {
+        if (handNum == 3) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
                     currentPlayer.moveFromBoneyardToHandN(6);
                 }
             }
-            System.out.println("\nHand Number: " + handnum + "\n");
+            System.out.println("\nHand Number: " + String.valueOf(handNum) + "\n");
             playHand();
-            handnum += 1;
+            handNum += 1;
+            mainController.notifyHandChange();
         }
-        if (handnum == 4) {
+        if (handNum == 4) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
                     currentPlayer.moveFromBoneyardToHandN(4);
                 }
             }
-            System.out.println("\nHand Number: " + handnum + "\n");
+            System.out.println("\nHand Number: " + String.valueOf(handNum) + "\n");
             playHand();
-            handnum += 1;
+            handNum += 1;
+            mainController.notifyHandChange();
         } else {
+            mainController.notifyRoundEnd();
             System.out.println("\nRound Finished Scoring Round\n");
             //Return Score to View
             this.scoreRound();
@@ -280,6 +307,7 @@ public class Tournament implements Parcelable {
                     List<Tile> stack = new ArrayList<>();
                     executeMove(handTile, stackTile);
                     consecutivePasses = 0;
+                    break;
                 } else {
                     System.out.println("\nPlayer " + currentPlayer.getPlayerID() + " passed");
                     consecutivePasses++;
@@ -334,6 +362,7 @@ public class Tournament implements Parcelable {
                     break;
                 }
             }
+            break;
         }
         System.out.println("\nHand Over");
         System.out.println("Final Hands:");
@@ -354,7 +383,7 @@ public class Tournament implements Parcelable {
             currentPlayer.addScore(score);
             System.out.println("Player " + currentPlayer.getPlayerID() + " scored " + score + " points");
         }
-        mainController.notifyEndHand(finalScores);
+        mainController.notifyHandEnd(finalScores);
         System.out.println("\nCumulative Scores:");
         for (Player currentPlayer : players) {
             System.out.println("Player " + currentPlayer.getPlayerID() + ": " + currentPlayer.getScore());
@@ -628,7 +657,11 @@ public class Tournament implements Parcelable {
         Parcelable[] parcelableArray = players.toArray(new Parcelable[players.size()]);
         dest.writeParcelableArray(parcelableArray, flags);
         dest.writeParcelable(currentPlayer, flags);
-        dest.writeParcelable(mainController, flags);
+        //dest.writeParcelable(mainController, flags);
+    }
+
+    public int getHandNum() {
+        return handNum;
     }
 }
 
