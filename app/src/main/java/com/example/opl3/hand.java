@@ -5,18 +5,15 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -28,18 +25,18 @@ public class hand extends AppCompatActivity {
 
     private Intent intent;
 
-    private Player cPlayer;
-
-    static hand INSTANCE;
-
     private TextView messageBoard;
 
     private LinearLayout boardDisplay;
 
     private LinearLayout table_display;
 
+    private RelativeLayout askYesNo;
 
-    private FrameLayout overallLayout;
+    private ImageButton yesButton;
+    private ImageButton noButton;
+    private TextView yesNoTitle;
+
 
 
     @Override
@@ -48,12 +45,19 @@ public class hand extends AppCompatActivity {
 
 
         setContentView(R.layout.domino_layout); // Change this to the correct layout file for the hand activity
-        overallLayout = findViewById(R.id.overall_layout);
         messageBoard = findViewById(R.id.message_board);
+        askYesNo = findViewById(R.id.recMoveAsk);
         boardDisplay = findViewById(R.id.board_display);
-        boardDisplay.setVisibility(View.VISIBLE);
+        yesNoTitle = findViewById(R.id.questionTextView);
         table_display = findViewById(R.id.table_display);
+        boardDisplay.setVisibility(View.VISIBLE);
+        messageBoard.setVisibility(View.VISIBLE);
         table_display.setVisibility(View.INVISIBLE);
+        askYesNo.setVisibility(View.INVISIBLE);
+
+        yesButton = findViewById(R.id.yesButton);
+        noButton = findViewById(R.id.noButton);
+
 
         // Initialize the RecyclerViews
         stackSection1RecyclerView = findViewById(R.id.stack_section_1_recycler_view);
@@ -62,11 +66,12 @@ public class hand extends AppCompatActivity {
         // Initialize the lists of stack and hand tiles
         stackTiles = new ArrayList<>();
         handTiles = new ArrayList<>();
-        Intent intent = getIntent();
-        mainController = new Controller();
-        mainController.setActivity(this);
+        mainController = new Controller(this);
+        intent = getIntent();
+
         mainController.startGame();
-        List<Player> players = mainController.getTournament().getPlayers();
+
+        List<Player> players = mainController.getPlayers();
 
         for (Player player : players) {
             for (Tile tile : player.getStack()) {
@@ -74,7 +79,7 @@ public class hand extends AppCompatActivity {
             }
         }
 
-        Player cPlayer = mainController.getTournament().getCurrentPlayer();
+        Player cPlayer = mainController.getCurrentPlayer();
         for (Tile tile : cPlayer.getHand()) {
             handTiles.add(tile);
         }
@@ -94,38 +99,11 @@ public class hand extends AppCompatActivity {
         Log.d("HAND_ACTIVITY", "stackTiles size: " + stackTiles.size());
         Log.d("HAND_ACTIVITY", "handTiles size: " + handTiles.size());
 
-
-
-            // Add your tiles to the stackTiles and handTiles lists, then call the adapters' notifyDataSetChanged() method
-            // stackTiles.add(...);
-            // stackSection1Adapter.notifyDataSetChanged();
-
-            // handTiles.add(...);
-    }
-
-    public static hand getActivityInstance()
-    {
-        return INSTANCE;
-    }
-
-    public Controller getData()
-    {
-        return this.mainController;
-    }
-
-    public void setStackTiles(List<Tile> stackTiles) {
-        this.stackTiles = stackTiles;
-    }
-
-    public void setHandTiles(List<Tile> handTiles) {
-        this.handTiles = handTiles;
     }
 
     public void setMessageBoard(String message) {
         messageBoard.setText(message);
     }
-
-
 
 
     //Get stackAdapter
@@ -176,4 +154,65 @@ public class hand extends AppCompatActivity {
         hideBoardDisplay();
         showScoreDisplay();
     }
+
+    public void showRecMove() {
+        yesNoTitle.setText("Would you like a recommended move?");
+        askYesNo.setVisibility(View.VISIBLE);
+        yesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainController.setYesNo("y");
+            }
+        });
+
+        noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainController.setYesNo("n");
+            }
+        });
+    }
+
+    public void hideRecMove() {
+        askYesNo.setVisibility(View.INVISIBLE);
+    }
+
+    public void showMessageBoard() {
+        messageBoard.setVisibility(View.VISIBLE);
+    }
+
+    public void hideMessageBoard() {
+        messageBoard.setVisibility(View.INVISIBLE);
+    }
+
+    public void stopYesNoListeners() {
+        yesButton.setOnClickListener(null);
+        noButton.setOnClickListener(null);
+    }
+
+    public void clearMessageBoard() {
+        messageBoard.setText("");
+    }
+
+    public void showPass() {
+
+        yesNoTitle.setText("Do you want to pass?");
+        askYesNo.setVisibility(View.VISIBLE);
+        yesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainController.setYesNo("y");
+            }
+        });
+
+        noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainController.setYesNo("n");
+            }
+        });
+    }
+
+
+
 }

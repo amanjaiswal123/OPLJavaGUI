@@ -15,9 +15,6 @@
             android:name=".drawScores"
             android:exported="false" />
         <activity
-            android:name=".Activity2"
-            android:exported="false" />
-        <activity
             android:name=".hand"
             android:exported="false" />
         <activity

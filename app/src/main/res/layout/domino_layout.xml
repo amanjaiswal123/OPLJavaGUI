@@ -94,6 +94,7 @@
         android:orientation="vertical"
         tools:context=".hand">
 
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -127,13 +128,66 @@
                 android:gravity="center_horizontal"
                 android:text="Message Board:" />
 
-            <TextView
-                android:id="@+id/message_board"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:textSize="36dp" />
+                android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/message_board"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textSize="36dp" />
+
+                <RelativeLayout
+                    android:id="@+id/recMoveAsk"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="16dp">
+
+
+                    <TextView
+                        android:id="@+id/questionTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:text="Would like a Recommend Move?"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:layout_marginBottom="24dp"/>
+
+                    <LinearLayout
+                        android:id="@+id/buttonContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/questionTextView"
+                        android:layout_centerHorizontal="true"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <ImageButton
+                            android:id="@+id/yesButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:src="@drawable/yes"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="Yes"
+                            android:background="?attr/selectableItemBackground"
+                            android:layout_marginEnd="8dp"/>
+
+                        <ImageButton
+                            android:id="@+id/noButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:src="@drawable/no"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="No"
+                            android:background="?attr/selectableItemBackground"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+                </RelativeLayout>
+            </FrameLayout>
         </LinearLayout>
 
         <LinearLayout

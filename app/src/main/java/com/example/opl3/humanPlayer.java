@@ -5,8 +5,6 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 
 public class humanPlayer extends Player implements Parcelable {
@@ -32,12 +30,28 @@ public class humanPlayer extends Player implements Parcelable {
 
     @Override
     public List<Object> getValidMove(List<Player> players, List<Object> recMove, Controller mainController) {
-        boolean askUserRecMove = false;
+        boolean askUserRecMove;
+        mainController.ResetYesNoPrompt();
+        mainController.notifyaskRecMove();
+        while (mainController.getUserYesNo() == null) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        askUserRecMove = mainController.getUserYesNo() == "y";
+        mainController.notifyReciviedPass();
+        String message;
         if (recMove.get(0).equals("pass") && askUserRecMove) {
-            System.out.println("There are no valid moves. You must pass.");
+            message = "There are no valid moves. You must pass.";
+            System.out.println(message);
+            mainController.notifyReciviedRecMove(message);
         }
         if (askUserRecMove && !recMove.get(0).equals("pass")) {
-            System.out.println("The Best Move is " + recMove.get(0) + " on " + recMove.get(1) + " because it has a difference of " + recMove.get(2) + " which is the lowest difference move on an opponent's stack.\n");
+            message = "The Best Move is " + recMove.get(0) + " on " + recMove.get(1) + " because it has a difference of " + recMove.get(2) + " which is the lowest difference move on an opponent's stack.";
+            System.out.println(message);
+            mainController.notifyReciviedRecMove(message);
         }
         List<Object> move = this.getMove(players, recMove, mainController);
         if (!move.get(0).equals("pass")) {
@@ -54,7 +68,7 @@ public class humanPlayer extends Player implements Parcelable {
             if (recMove.get(0).equals("pass")) {
                 return move;
             } else {
-                System.out.println("Cannot Pass, valid moves available.");
+                System.out.println("Cannot Pass when valid moves available.");
                 return this.getValidMove(players, recMove, mainController);
             }
         }

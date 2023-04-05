@@ -10,12 +10,10 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-public class Tournament implements Parcelable {
+public class Tournament  {
     private Controller mainController;
-
     List<Player> players;
     private Player currentPlayer;
-
     private int handNum;
 
     public Tournament(Controller mainController_) {
@@ -23,28 +21,9 @@ public class Tournament implements Parcelable {
         this.players = new ArrayList<>();
     }
 
-    protected Tournament(Parcel in) {
-        mainController = in.readParcelable(Controller.class.getClassLoader());
-        players = in.createTypedArrayList(Player.CREATOR);
-        currentPlayer = in.readParcelable(Player.class.getClassLoader());
-    }
-
-    public static final Creator<Tournament> CREATOR = new Creator<Tournament>() {
-        @Override
-        public Tournament createFromParcel(Parcel in) {
-            return new Tournament(in);
-        }
-
-        @Override
-        public Tournament[] newArray(int size) {
-            return new Tournament[size];
-        }
-    };
-
     public void start_new_tournament() {
         // Create a new player object
         handNum = 1;
-        this.players = new ArrayList<>();
         Player humanPlayer = new humanPlayer();
         humanPlayer.createNewPlayer("Human", "B");
         Player computerPlayer = new computerPlayer();
@@ -126,7 +105,7 @@ public class Tournament implements Parcelable {
         for (Player player : players) {
             System.out.println("Player " + player.getPlayerID() + " won " + player.getRoundsWon() + " rounds.");
         }
-        String input = this.getValidInput("\nWould you like to another round? (Y/N): ", Arrays.asList("Y", "N"));
+        String input = "N";
         if (input.equals("Y")) {
             this.startNewRound();
         } else {
@@ -199,8 +178,8 @@ public class Tournament implements Parcelable {
             System.out.println("\nHand Number: " + String.valueOf(handNum) + "\n");
             playHand();
             handNum += 1;
-            mainController.notifyHandChange();
         }
+        mainController.notifyHandChange();
         if (handNum == 2) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
@@ -210,8 +189,8 @@ public class Tournament implements Parcelable {
             System.out.println("\nHand Number: " + String.valueOf(handNum) + "\n");
             playHand();
             handNum += 1;
-            mainController.notifyHandChange();
         }
+        mainController.notifyHandChange();
         if (handNum == 3) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
@@ -221,8 +200,8 @@ public class Tournament implements Parcelable {
             System.out.println("\nHand Number: " + String.valueOf(handNum) + "\n");
             playHand();
             handNum += 1;
-            mainController.notifyHandChange();
         }
+        mainController.notifyHandChange();
         if (handNum == 4) {
             if (players.get(0).getHand().size() == 0 && players.get(1).getHand().size() == 0) {
                 for (Player currentPlayer : players) {
@@ -234,10 +213,10 @@ public class Tournament implements Parcelable {
             handNum += 1;
             mainController.notifyHandChange();
         } else {
-            mainController.notifyRoundEnd();
             System.out.println("\nRound Finished Scoring Round\n");
             //Return Score to View
-            this.scoreRound();
+            Map<String, Integer> finalRoundWins = this.scoreRound();
+            mainController.notifyRoundEnd(finalRoundWins);
         }
     }
 
@@ -307,7 +286,6 @@ public class Tournament implements Parcelable {
                     List<Tile> stack = new ArrayList<>();
                     executeMove(handTile, stackTile);
                     consecutivePasses = 0;
-                    break;
                 } else {
                     System.out.println("\nPlayer " + currentPlayer.getPlayerID() + " passed");
                     consecutivePasses++;
@@ -362,7 +340,6 @@ public class Tournament implements Parcelable {
                     break;
                 }
             }
-            break;
         }
         System.out.println("\nHand Over");
         System.out.println("Final Hands:");
@@ -376,19 +353,19 @@ public class Tournament implements Parcelable {
         //     // Get the scores for the stacks
         Map<String, Integer> stackScores = scoreStacks();
         // Create a dictionary to hold the final scores of the players
-        Map<String, Integer> finalScores = new HashMap<>();
         for (Player currentPlayer : players) {
             int score = stackScores.get(currentPlayer.getPlayerID()) - handScores.get(currentPlayer.getPlayerID());
-            finalScores.put(currentPlayer.getPlayerID(), score);
             currentPlayer.addScore(score);
-            System.out.println("Player " + currentPlayer.getPlayerID() + " scored " + score + " points");
+            System.out.println("Player " + currentPlayer.getPlayerID() + " scored " + score + " points this hand");
         }
-        mainController.notifyHandEnd(finalScores);
+        Map<String, Integer> finalScores = new HashMap<>();
         System.out.println("\nCumulative Scores:");
         for (Player currentPlayer : players) {
+            finalScores.put(currentPlayer.getPlayerID(), currentPlayer.getScore());
             System.out.println("Player " + currentPlayer.getPlayerID() + ": " + currentPlayer.getScore());
             currentPlayer.getHand().clear();
         }
+        mainController.notifyHandEnd(finalScores);
     }
 
     public static boolean isFileTaken(String filePath) {
@@ -430,7 +407,7 @@ public class Tournament implements Parcelable {
     }
 
 
-    public void scoreRound () {
+    public Map<String, Integer> scoreRound () {
         Map<String, Integer> finalScores = new HashMap<>();
         boolean first = true;
         int highestScore = 0;
@@ -445,7 +422,6 @@ public class Tournament implements Parcelable {
                 winner = currentPlayer;
                 highestScore = score;
             }
-            finalScores.put(currentPlayer.getPlayerID(), score);
             currentPlayer.addScore(score);
             System.out.println("Player " + currentPlayer.getPlayerID() + " scored " + score + " points");
         }
@@ -455,7 +431,7 @@ public class Tournament implements Parcelable {
             winner.addRoundWins();
             System.out.println("Player " + winner.getPlayerID() + " won the round");
         }
-
+        return finalScores;
     }
 
     public List<Object> extractPlayerData(String filePath) {
@@ -537,19 +513,7 @@ public class Tournament implements Parcelable {
         return List.of(playerData, turn);
     }
 
-    public void load_tournament () {
-        String filename = "seralize6";
-
-        while (true) {
-            //System.out.print("Please Enter a filename: ");
-            //filename = this.scanner.nextLine().trim();
-            filename = "Seralize/"+filename+".txt";
-            if (!this.isFileTaken(filename)) {
-                System.out.println("The file is not present. Check the Seralize Directory \n");
-            } else {
-                break;
-            }
-        }
+    public void load_tournament (String filename) {
         List<Object> playerData = extractPlayerData(filename);
         Player humanPlayer = new Player();
         Player computerPlayer_ = new computerPlayer();
@@ -616,14 +580,14 @@ public class Tournament implements Parcelable {
             c_boneyard_converted = new ArrayList<>();
             c_stacks_converted = new ArrayList<>();
         }
-        int handnum = 4-(humanPlayer.getBoneyard().size()/6);
-        if (handnum == 0){
+        handNum = 4-(humanPlayer.getBoneyard().size()/6);
+        if (handNum == 0){
             for (Player c_player : players){
                 c_player.shuffleBoneyard();
                 c_player.moveFromBoneyardToHandN(6);
                 c_player.moveFromHandToStackN(6);
             }
-            handnum++;
+            handNum++;
         }
         if (turn.equals("Computer")) {
             players.add(computerPlayer_);
@@ -637,6 +601,8 @@ public class Tournament implements Parcelable {
             players.add(computerPlayer_);
             this.determineOrder();
         }
+        this.play_round();
+        this.play_again();
     }
 
     public Player getCurrentPlayer() {

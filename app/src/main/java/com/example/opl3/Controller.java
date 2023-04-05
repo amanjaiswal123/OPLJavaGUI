@@ -1,54 +1,28 @@
 package com.example.opl3;
 
 
-import static androidx.core.app.ActivityCompat.startActivityForResult;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.view.View;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 
-public class Controller implements Parcelable {
+public class Controller{
     private Tile stackSelected;
     private Tile handSelected;
     private Tournament tournament;
 
     private hand activity;
+    private String askUserRecMove;
 
-    public Controller(){
+
+    public Controller(hand activity){
         tournament = new Tournament(this);
+        this.activity = activity;
     }
 
     public void setActivity(hand activity){
         this.activity = activity;
     }
-
-    protected Controller(Parcel in) {
-        stackSelected = in.readParcelable(Tile.class.getClassLoader());
-        handSelected = in.readParcelable(Tile.class.getClassLoader());
-        tournament = in.readParcelable(Tournament.class.getClassLoader());
-    }
-
-    public static final Creator<Controller> CREATOR = new Creator<Controller>() {
-        @Override
-        public Controller createFromParcel(Parcel in) {
-            return new Controller(in);
-        }
-
-        @Override
-        public Controller[] newArray(int size) {
-            return new Controller[size];
-        }
-    };
 
     public void startGame() {
         Thread thread = new Thread(new Runnable() {
@@ -135,25 +109,13 @@ public class Controller implements Parcelable {
                     public void run() {
                         activity.showBoardDisplay();
                         activity.hideScoreDisplay();
+                        activity.clearMessageBoard();
                         activity.getStackAdapter().notifyDataSetChanged();
                         activity.getHandAdapter().notifyDataSetChanged();
                     }
                 }
         );
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(stackSelected, flags);
-        dest.writeParcelable(handSelected, flags);
-        dest.writeParcelable(tournament, flags);
-    }
-
     public void notifyHandChange() {
         activity.setMessageBoard("Hand " + String.valueOf(tournament.getHandNum()) + " of " + 4);
     }
@@ -174,8 +136,88 @@ public class Controller implements Parcelable {
         }
     }
 
-    public void notifyRoundEnd() {
+    public void ResetYesNoPrompt() {
+        this.askUserRecMove = null;
     }
 
+    public String getUserYesNo() {
+        return this.askUserRecMove;
+    }
+
+    public void setYesNo(String b) {
+        activity.stopYesNoListeners();
+        this.askUserRecMove = b;
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.hideRecMove();
+                        activity.showMessageBoard();
+                    }
+                }
+        );
+    }
+
+    public void notifyaskRecMove() {
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.hideMessageBoard();
+                        activity.showRecMove();
+                    }
+                }
+        );
+    }
+
+    public void notifyReciviedRecMove(String message) {
+        askUserRecMove = null;
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.hideRecMove();
+                        activity.showMessageBoard();
+                        activity.setMessageBoard(message);
+                    }
+                }
+        );
+    }
+
+    public void notifyaskPass() {
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.hideMessageBoard();
+                        activity.showPass();
+                    }
+                }
+        );
+    }
+
+    public void notifyReciviedPass() {
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.hideRecMove();
+                        activity.showMessageBoard();
+                    }
+                }
+        );
+    }
+
+    public List<Player> getPlayers(){
+        return tournament.getPlayers();
+    }
+
+    public void notifyRoundEnd(Map<String, Integer> finalRoundWins) {
+
+    }
+
+    public Player getCurrentPlayer() {
+        return tournament.getCurrentPlayer();
+    }
 }
 

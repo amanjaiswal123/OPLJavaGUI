@@ -8,23 +8,8 @@ import androidx.annotation.NonNull;
 import java.io.Serializable;
 import java.util.List;
 
-public class computerPlayer extends Player implements Parcelable {
+public class computerPlayer extends Player {
     public computerPlayer(){super();}
-
-    protected computerPlayer(Parcel in) {
-    }
-
-    public static final Creator<computerPlayer> CREATOR = new Creator<computerPlayer>() {
-        @Override
-        public computerPlayer createFromParcel(Parcel in) {
-            return new computerPlayer(in);
-        }
-
-        @Override
-        public computerPlayer[] newArray(int size) {
-            return new computerPlayer[size];
-        }
-    };
 
     @Override
     public List<Object> getValidMove(List<Player> players, List<Object> recMove, Controller mainController) {

@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-import java.io.Serializable;
 import java.util.*;
 
 public class Player implements Parcelable {
@@ -333,11 +332,17 @@ public class Player implements Parcelable {
 
     public List<Object> getMove(List<Player> players, List<Object> recMove, Controller mainController) {
         List<String> validHandInputs = new ArrayList<>();
-        if (recMove.get(0).equals("pass")) {
-            validHandInputs.add("pass");
-            this.getValidInput("Enter a tile from your hand to play: ", validHandInputs);
-            return recMove;
-        } else {
+        mainController.ResetYesNoPrompt();
+        mainController.notifyaskPass();
+        while (mainController.getUserYesNo() == null){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        boolean pass = mainController.getUserYesNo() == "y";
+        if (!pass) {
             for (Tile handTile : hand) {
                 validHandInputs.add(handTile.toString().substring(1, 4));
             }
@@ -398,6 +403,11 @@ public class Player implements Parcelable {
             move.add(handTile);
             move.add(stackTile);
             return move;
+        }
+        else{
+            List<Object> passMove = new ArrayList<>();
+            passMove.add("pass");
+            return passMove;
         }
     }
 
