@@ -219,5 +219,27 @@ public class Controller{
     public Player getCurrentPlayer() {
         return tournament.getCurrentPlayer();
     }
+
+    public void notifySaveGame() {
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.askSaveGame();
+                    }
+                }
+        );
+    }
+
+    public void getFileName() {
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.getFileName();
+                    }
+                }
+        );
+    }
 }
 

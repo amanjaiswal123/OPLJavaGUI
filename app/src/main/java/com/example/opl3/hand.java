@@ -1,18 +1,26 @@
 package com.example.opl3;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +45,7 @@ public class hand extends AppCompatActivity {
     private ImageButton noButton;
     private TextView yesNoTitle;
 
-
+    private EditText fileName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +58,7 @@ public class hand extends AppCompatActivity {
         boardDisplay = findViewById(R.id.board_display);
         yesNoTitle = findViewById(R.id.questionTextView);
         table_display = findViewById(R.id.table_display);
+        fileName.setVisibility(View.INVISIBLE);
         boardDisplay.setVisibility(View.VISIBLE);
         messageBoard.setVisibility(View.VISIBLE);
         table_display.setVisibility(View.INVISIBLE);
@@ -213,6 +222,68 @@ public class hand extends AppCompatActivity {
         });
     }
 
+    public void askSaveGame(){
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[] {
+                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                    },
+                    100
+            );
+        }
+        messageBoard.setVisibility(View.INVISIBLE);
+        askYesNo.setVisibility(View.VISIBLE);
+        yesNoTitle.setText("Would you like to save the game?");
+        yesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainController.setYesNo("y");
+            }
+        });
 
+        noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainController.setYesNo("n");
+            }
+        });
 
+    }
+
+    public void getFileName(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[] {
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                    },
+                    100
+            );
+        }
+        fileName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    String filePath = fileName.getText().toString();
+                    //filePath = "/storage/emulated/0/seralize1.txt";
+                    File file = new File(filePath);
+                    if (file.exists() && !file.isDirectory()) {
+                        Intent intent = new Intent(getApplicationContext(), hand.class);
+                        intent.putExtra("filepath", filePath);
+                        intent.putExtra("load", "Y");
+                        startActivity(intent);
+                        return true;
+                    } else {
+                        System.out.println("Invalid file path");
+                        invalidPath.setVisibility(View.VISIBLE);
+                    }
+                }
+                return false;
+            }
+    }
 }

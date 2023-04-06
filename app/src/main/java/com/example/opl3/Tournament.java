@@ -264,8 +264,25 @@ public class Tournament  {
                 break;
             }
         }
+        boolean first = true;
+        boolean askSaveGame = false;
         while (consecutivePasses < players.size() && !allEmptyHands) {
             for (Player currentPlayer : players) {
+                if (first) {
+                    first = false;
+                }
+                else{
+                    mainController.notifySaveGame();
+                    mainController.ResetYesNoPrompt();
+                    while (mainController.getUserYesNo() == null){
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    askSaveGame = mainController.getUserYesNo().equals("y") ;
+                }
                 this.currentPlayer = currentPlayer;
                 mainController.notifyNewTurn();
                 currentPlayer.savePlayer();
@@ -296,7 +313,7 @@ public class Tournament  {
                 if (consecutivePasses >= players.size()) {
                     break;
                 }
-                boolean askSaveGame = currentPlayer.getValidInput("Would you like to save the game? (Y/N): ", Arrays.asList("Y", "N")).equals("Y");
+
                 if (askSaveGame) {
                     StringBuilder save = new StringBuilder();
                     for (Player player : players) {
@@ -310,17 +327,7 @@ public class Tournament  {
                     }
                     String filename;
 
-                    while (true) {
-                        System.out.print("Please Enter a filename: ");
-                        //filename = this.scanner.nextLine().trim();
-                        filename = "";
-                        filename = "Seralize/" + filename + ".txt";
-                        if (this.isFileTaken(filename)) {
-                            System.out.println("The Filename is already taken, please enter a diffrent one. Check the Seralize Directory \n");
-                        } else {
-                            break;
-                        }
-                    }
+                    mainController.getFileName();
 
                     try {
                         PrintWriter writer = new PrintWriter(filename);
@@ -611,19 +618,6 @@ public class Tournament  {
 
     public List<Player> getPlayers() {
         return this.players;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        Parcelable[] parcelableArray = players.toArray(new Parcelable[players.size()]);
-        dest.writeParcelableArray(parcelableArray, flags);
-        dest.writeParcelable(currentPlayer, flags);
-        //dest.writeParcelable(mainController, flags);
     }
 
     public int getHandNum() {

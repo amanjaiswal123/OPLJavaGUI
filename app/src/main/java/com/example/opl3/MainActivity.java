@@ -5,6 +5,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.KeyEvent;
@@ -18,6 +19,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.Manifest;
 import org.w3c.dom.Text;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 
 import java.io.File;
 
@@ -54,9 +58,7 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), hand.class);
-                intent.putExtra("load", "no");
-                startActivity(intent);
+                askLoad();
             }
         });
     }
@@ -103,21 +105,28 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        File file;
-        File externalStorageDir = Environment.getExternalStorageDirectory();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[] {
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                    },
+                    100
+            );
+        }
         fileName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     String filePath = fileName.getText().toString();
-                    filePath = "/storage/emulated/0/seralize1.txt";
+                    //filePath = "/storage/emulated/0/seralize1.txt";
                     File file = new File(filePath);
                     if (file.exists() && !file.isDirectory()) {
                         Intent intent = new Intent(getApplicationContext(), hand.class);
                         intent.putExtra("filepath", filePath);
                         intent.putExtra("load", "Y");
-                        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE};
-                        requestPermissions(permissions,100);
                         startActivity(intent);
                         return true;
                     } else {
