@@ -45,7 +45,14 @@ public class hand extends AppCompatActivity {
     private ImageButton noButton;
     private TextView yesNoTitle;
 
-    private EditText fileName;
+    private LinearLayout fileName;
+
+    private  EditText fileNameTXT;
+
+    private TextView invalidPath;
+
+
+    private LinearLayout buttonContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,16 +61,20 @@ public class hand extends AppCompatActivity {
 
         setContentView(R.layout.domino_layout); // Change this to the correct layout file for the hand activity
         messageBoard = findViewById(R.id.message_board);
-        askYesNo = findViewById(R.id.recMoveAsk);
+        askYesNo = findViewById(R.id.askYesNo);
         boardDisplay = findViewById(R.id.board_display);
         yesNoTitle = findViewById(R.id.questionTextView);
         table_display = findViewById(R.id.table_display);
-        fileName.setVisibility(View.INVISIBLE);
+        invalidPath = findViewById(R.id.invalidpath);
+        fileName = findViewById(R.id.fileName);
+        fileNameTXT = findViewById(R.id.fileNameTXT);
+        buttonContainer = findViewById(R.id.buttonContainer);
         boardDisplay.setVisibility(View.VISIBLE);
         messageBoard.setVisibility(View.VISIBLE);
         table_display.setVisibility(View.INVISIBLE);
         askYesNo.setVisibility(View.INVISIBLE);
-
+        fileName.setVisibility(View.INVISIBLE);
+        invalidPath.setVisibility(View.INVISIBLE);
         yesButton = findViewById(R.id.yesButton);
         noButton = findViewById(R.id.noButton);
 
@@ -204,7 +215,6 @@ public class hand extends AppCompatActivity {
     }
 
     public void showPass() {
-
         yesNoTitle.setText("Do you want to pass?");
         askYesNo.setVisibility(View.VISIBLE);
         yesButton.setOnClickListener(new View.OnClickListener() {
@@ -253,7 +263,7 @@ public class hand extends AppCompatActivity {
 
     }
 
-    public void getFileName(){
+    public void askFileName(){
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
@@ -265,18 +275,17 @@ public class hand extends AppCompatActivity {
                     100
             );
         }
-        fileName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        fileName.setVisibility(View.VISIBLE);
+        fileNameTXT.setVisibility(View.VISIBLE);
+        fileNameTXT.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    String filePath = fileName.getText().toString();
+                    String filePath = fileNameTXT.getText().toString();
                     //filePath = "/storage/emulated/0/seralize1.txt";
                     File file = new File(filePath);
-                    if (file.exists() && !file.isDirectory()) {
-                        Intent intent = new Intent(getApplicationContext(), hand.class);
-                        intent.putExtra("filepath", filePath);
-                        intent.putExtra("load", "Y");
-                        startActivity(intent);
+                    if (!file.exists() && !file.isDirectory()) {
+                        mainController.setFileName(filePath);
                         return true;
                     } else {
                         System.out.println("Invalid file path");
@@ -285,5 +294,6 @@ public class hand extends AppCompatActivity {
                 }
                 return false;
             }
+        });
     }
 }

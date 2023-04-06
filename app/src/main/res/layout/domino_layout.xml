@@ -131,16 +131,45 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@+id/fileName"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/questionTextView"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <EditText
+                        android:imeOptions="actionDone"
+                        android:singleLine="true"
+                        android:id="@+id/fileNameTXT"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/darker_gray"
+                        android:backgroundTint="@color/white"
+                        android:hint="Enter file path to save game here"
+                        android:textColor="@android:color/black"/>
+
+                    <TextView
+                        android:id="@+id/invalidpath"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Invalid File Path"
+                        android:textSize="24sp"
+                        android:textColor="@android:color/holo_red_dark" />
+                </LinearLayout>
+
                 <TextView
                     android:id="@+id/message_board"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:textSize="36dp" />
+                    android:textSize="24dp" />
 
                 <RelativeLayout
-                    android:id="@+id/recMoveAsk"
+                    android:id="@+id/askYesNo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:padding="16dp">
@@ -152,52 +181,40 @@
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
                         android:text="Would like a Recommend Move?"
-                        android:textAppearance="?attr/textAppearanceHeadline6"
-                        android:layout_marginBottom="24dp"/>
+                        android:textAppearance="?attr/textAppearanceHeadline6" />
 
                     <LinearLayout
                         android:id="@+id/buttonContainer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_below="@+id/questionTextView"
                         android:layout_centerHorizontal="true"
-                        android:orientation="horizontal"
-                        android:gravity="center">
+                        android:gravity="center"
+                        android:orientation="horizontal">
 
                         <ImageButton
                             android:id="@+id/yesButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
                             android:layout_weight="1"
-                            android:src="@drawable/yes"
-                            android:scaleType="fitCenter"
-                            android:contentDescription="Yes"
                             android:background="?attr/selectableItemBackground"
-                            android:layout_marginEnd="8dp"/>
+                            android:contentDescription="Yes"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/yes" />
 
                         <ImageButton
                             android:id="@+id/noButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
                             android:layout_weight="1"
-                            android:src="@drawable/no"
-                            android:scaleType="fitCenter"
-                            android:contentDescription="No"
                             android:background="?attr/selectableItemBackground"
-                            android:layout_marginStart="8dp"/>
-
-                        <EditText
-                            android:id="@+id/fileName"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:background="@android:color/darker_gray"
-                            android:hint="Enter file path here"
-                            android:inputType="text"
-                            android:textColor="@android:color/black"
-                            android:backgroundTint="@color/white"
-                            android:visibility="visible" />
+                            android:contentDescription="No"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/no" />
                     </LinearLayout>
+
 
                 </RelativeLayout>
             </FrameLayout>

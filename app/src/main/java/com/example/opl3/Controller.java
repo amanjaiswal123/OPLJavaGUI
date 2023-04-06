@@ -14,6 +14,8 @@ public class Controller{
     private hand activity;
     private String askUserRecMove;
 
+    private String filepath;
+
 
     public Controller(hand activity){
         tournament = new Tournament(this);
@@ -231,12 +233,20 @@ public class Controller{
         );
     }
 
-    public void getFileName() {
+    public String getFileName() {
+        return filepath;
+    }
+
+    public void setFileName(String filePath) {
+        filepath = filePath;
+    }
+
+    public void notifyConfirmSave() {
         activity.runOnUiThread(
                 new Runnable() {
                     @Override
                     public void run() {
-                        activity.getFileName();
+                        activity.askFileName();
                     }
                 }
         );

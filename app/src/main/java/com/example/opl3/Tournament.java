@@ -264,28 +264,11 @@ public class Tournament  {
                 break;
             }
         }
-        boolean first = true;
         boolean askSaveGame = false;
         while (consecutivePasses < players.size() && !allEmptyHands) {
             for (Player currentPlayer : players) {
-                if (first) {
-                    first = false;
-                }
-                else{
-                    mainController.notifySaveGame();
-                    mainController.ResetYesNoPrompt();
-                    while (mainController.getUserYesNo() == null){
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    askSaveGame = mainController.getUserYesNo().equals("y") ;
-                }
                 this.currentPlayer = currentPlayer;
                 mainController.notifyNewTurn();
-                currentPlayer.savePlayer();
                 System.out.println("Player " + currentPlayer.getPlayerID() + "'s turn:\n");
                 currentPlayer.displayHand();
                 System.out.println();
@@ -313,8 +296,18 @@ public class Tournament  {
                 if (consecutivePasses >= players.size()) {
                     break;
                 }
-
+                mainController.notifySaveGame();
+                mainController.ResetYesNoPrompt();
+                while (mainController.getUserYesNo() == null){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                askSaveGame = mainController.getUserYesNo() == "y";
                 if (askSaveGame) {
+                    mainController.notifyConfirmSave();
                     StringBuilder save = new StringBuilder();
                     for (Player player : players) {
                         save.append(player.savePlayer());
@@ -325,10 +318,14 @@ public class Tournament  {
                     } else {
                         save.append("Turn: ").append(this.players.get(1).getPlayerID());
                     }
-                    String filename;
-
-                    mainController.getFileName();
-
+                    while (mainController.getFileName() == null){
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    String filename = mainController.getFileName();
                     try {
                         PrintWriter writer = new PrintWriter(filename);
                         writer.println(save);
