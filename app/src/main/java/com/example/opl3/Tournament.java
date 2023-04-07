@@ -1,14 +1,10 @@
 package com.example.opl3;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static java.lang.System.exit;
-
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
 
 public class Tournament  {
     private Controller mainController;
@@ -21,13 +17,15 @@ public class Tournament  {
         this.players = new ArrayList<>();
     }
 
-    public void start_new_tournament() {
+    public void start_new_tournament(int humanRoundWins, int computerRoundWins) {
         // Create a new player object
         handNum = 1;
         Player humanPlayer = new humanPlayer();
         humanPlayer.createNewPlayer("Human", "B");
+        humanPlayer.setRoundsWon(humanRoundWins);
         Player computerPlayer = new computerPlayer();
         computerPlayer.createNewPlayer("Computer", "W");
+        computerPlayer.setRoundsWon(computerRoundWins);
         this.players = new ArrayList<>();
         this.players.add(humanPlayer);
         this.players.add(computerPlayer);
@@ -96,28 +94,26 @@ public class Tournament  {
                     }
                 }
             }
-            winner.addRoundWins();
             System.out.println("Player " + winner.getPlayerID() + " won the round!\n");;
         } else {
             System.out.println("The Tournament is a Tie!");
         }
 
+        Map<String, Integer> scores = new HashMap<>();
         for (Player player : players) {
+            scores.put(player.getPlayerID(), player.getRoundsWon());
             System.out.println("Player " + player.getPlayerID() + " won " + player.getRoundsWon() + " rounds.");
         }
-        String input = "N";
-        if (input.equals("Y")) {
-            this.startNewRound();
+        String winner = "";
+        if (players.get(0).getRoundsWon() == players.get(1).getRoundsWon()) {
+            winner = "Tie";
+        } else if (players.get(0).getRoundsWon() > players.get(1).getRoundsWon()) {
+            winner = players.get(0).getPlayerID();
         } else {
-            if (players.get(0).getRoundsWon() == players.get(1).getRoundsWon()) {
-                System.out.println("\nThe Tournament is a Tie!\n");
-            } else if (players.get(0).getRoundsWon() > players.get(1).getRoundsWon()) {
-                System.out.println("\nPlayer " + players.get(0).getPlayerID() + " won the Tournament!\n");
-            } else {
-                System.out.println("\nPlayer " + players.get(1).getPlayerID() + " won the Tournament!\n");
-            }
-            System.out.println("Thanks for playing!");
+            winner = players.get(1).getPlayerID();
         }
+        System.out.println("Thanks for playing!");
+        mainController.notifyGameOver(scores, winner);
     }
 
     public void determineOrder() {
@@ -211,12 +207,20 @@ public class Tournament  {
             System.out.println("\nHand Number: " + String.valueOf(handNum) + "\n");
             playHand();
             handNum += 1;
-            mainController.notifyHandChange();
-        } else {
+        }
+        if (handNum > 4) {
             System.out.println("\nRound Finished Scoring Round\n");
             //Return Score to View
             Map<String, Integer> finalRoundWins = this.scoreRound();
-            mainController.notifyRoundEnd(finalRoundWins);
+            int humanWins = finalRoundWins.get("Human");
+            int computerWins = finalRoundWins.get("Computer");
+            String winner = "Tie";
+            if (humanWins > computerWins) {
+                winner = "Human";
+            } else if (humanWins < computerWins) {
+                winner = "Computer";
+            }
+            mainController.notifyRoundEnd(finalRoundWins, winner);
         }
     }
 
@@ -318,23 +322,25 @@ public class Tournament  {
                     } else {
                         save.append("Turn: ").append(this.players.get(1).getPlayerID());
                     }
-                    while (mainController.getFileName() == null){
+                    while (mainController.getFile() == null){
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
-                    String filename = mainController.getFileName();
-                    try {
-                        PrintWriter writer = new PrintWriter(filename);
-                        writer.println(save);
-                        writer.close();
+                    File file = mainController.getFile();
+                    try (FileOutputStream fos = new FileOutputStream(file);
+                        OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                        osw.write(save.toString());
+                        osw.flush();
                         System.out.println("Data has been saved to the file.");
                         exit(0);
                     } catch (IOException e) {
                         System.out.println("An error occurred: " + e.getMessage());
                     }
+                } else {
+                    System.out.println("Please provide a valid file name.");
                 }
             }
             allEmptyHands = true;
@@ -431,19 +437,27 @@ public class Tournament  {
         }
         if (players.get(0).getScore() == players.get(1).getScore()) {
             System.out.println("\nIt's a tie!\n");
-        } else {
-            winner.addRoundWins();
+        } else if (players.get(0).getScore() > players.get(1).getScore()) {
             System.out.println("Player " + winner.getPlayerID() + " won the round");
+            players.get(0).addRoundWins();
+        }
+        else {
+            System.out.println("Player " + winner.getPlayerID() + " won the round");
+            players.get(1).addRoundWins();
+        }
+        for (Player currentPlayer : players) {
+            finalScores.put(currentPlayer.getPlayerID(), currentPlayer.getRoundsWon());
         }
         return finalScores;
     }
 
-    public List<Object> extractPlayerData(String filePath) {
+    public List<Object> extractPlayerData(File file) {
         List<Map<String, Object>> playerData = new ArrayList<>();
         Map<String, Object> ComputerPlayerData = new HashMap<>();
         Map<String, Object> HumanPlayerData = new HashMap<>();
         String turn = "";
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        StringBuilder stringBuilder = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             String currentPlayer = null;
             while ((line = br.readLine()) != null) {
@@ -517,10 +531,12 @@ public class Tournament  {
         return List.of(playerData, turn);
     }
 
-    public void load_tournament (String filename) {
-        List<Object> playerData = extractPlayerData(filename);
-        Player humanPlayer = new Player();
-        Player computerPlayer_ = new computerPlayer();
+    public void load_tournament (File file) {
+        List<Object> playerData = extractPlayerData(file);
+
+
+        humanPlayer humanPlayer = new humanPlayer();
+        computerPlayer computerPlayer_ = new computerPlayer();
         List<Map<String, Object>> serializedPlayers = (List<Map<String, Object>>) playerData.get(0);
         String turn = (String) playerData.get(1);
         String[] c_boneyard = null;

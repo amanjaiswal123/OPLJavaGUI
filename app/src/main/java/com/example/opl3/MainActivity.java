@@ -1,5 +1,6 @@
 package com.example.opl3;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
@@ -23,7 +24,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
     private ImageButton button;
@@ -59,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 askLoad();
+                return;
             }
         });
     }
@@ -87,8 +92,25 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), hand.class);
                 intent.putExtra("load", "no");
                 startActivity(intent);
+                finish();
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        } else {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[] {
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                    },
+                    100
+            );
+        }
     }
 
     public void askFileName(){
@@ -121,13 +143,13 @@ public class MainActivity extends AppCompatActivity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     String filePath = fileName.getText().toString();
-                    //filePath = "/storage/emulated/0/seralize1.txt";
-                    File file = new File(filePath);
+                    File file = new File(getExternalFilesDir(null), filePath);
                     if (file.exists() && !file.isDirectory()) {
                         Intent intent = new Intent(getApplicationContext(), hand.class);
                         intent.putExtra("filepath", filePath);
                         intent.putExtra("load", "Y");
                         startActivity(intent);
+                        finish();
                         return true;
                     } else {
                         System.out.println("Invalid file path");

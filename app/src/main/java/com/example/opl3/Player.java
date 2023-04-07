@@ -342,10 +342,8 @@ public class Player implements Parcelable {
             }
         }
         boolean pass = mainController.getUserYesNo() == "y";
-        if (!pass) {
-            for (Tile handTile : hand) {
-                validHandInputs.add(handTile.toString().substring(1, 4));
-            }
+        mainController.notifyReciviedPass();
+        if (!pass && recMove.get(0) != "pass") {
             mainController.resetHandSelected();
             while (mainController.getHandSelected() == null){
                 try {
@@ -404,7 +402,12 @@ public class Player implements Parcelable {
             move.add(stackTile);
             return move;
         }
-        else{
+        else if (!pass && recMove.get(0) == "pass") {
+            List<Object> passMove = new ArrayList<>();
+            passMove.add("");
+            return passMove;
+        }
+        else {
             List<Object> passMove = new ArrayList<>();
             passMove.add("pass");
             return passMove;
@@ -463,5 +466,9 @@ public class Player implements Parcelable {
         dest.writeParcelableArray(parcelableArray3, flags);
         dest.writeInt(getScore());
         dest.writeInt(getRoundsWon());
+    }
+
+    public void setRoundWins(int RoundWins) {
+        this.roundsWon = RoundWins;
     }
 }

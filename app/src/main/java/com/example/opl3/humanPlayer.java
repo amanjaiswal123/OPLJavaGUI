@@ -41,7 +41,6 @@ public class humanPlayer extends Player implements Parcelable {
             }
         }
         askUserRecMove = mainController.getUserYesNo() == "y";
-        mainController.notifyReciviedPass();
         String message;
         if (recMove.get(0).equals("pass") && askUserRecMove) {
             message = "There are no valid moves. You must pass.";
@@ -54,7 +53,7 @@ public class humanPlayer extends Player implements Parcelable {
             mainController.notifyReciviedRecMove(message);
         }
         List<Object> move = this.getMove(players, recMove, mainController);
-        if (!move.get(0).equals("pass")) {
+        if (!move.get(0).equals("pass") && !recMove.get(0).equals("pass")) {
             Tile handTile = (Tile) move.get(0);
             Tile stackTile = (Tile) move.get(1);
             if (checkValidMove(handTile, stackTile)) {
@@ -65,7 +64,7 @@ public class humanPlayer extends Player implements Parcelable {
             }
         }
         else{
-            if (recMove.get(0).equals("pass")) {
+            if (recMove.get(0).equals("pass") && move.get(0).equals("pass")) {
                 return move;
             } else {
                 System.out.println("Cannot Pass when valid moves available.");

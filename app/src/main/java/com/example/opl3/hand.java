@@ -89,7 +89,15 @@ public class hand extends AppCompatActivity {
         mainController = new Controller(this);
         intent = getIntent();
 
-        mainController.startGame();
+        String filepath = intent.getStringExtra("filepath");
+        int humanRoundWins = intent.getIntExtra("humanRoundWins", 0);
+        int computerRoundWins = intent.getIntExtra("computerRoundWins", 0);
+        if (filepath == null) {
+            mainController.startGame(humanRoundWins, computerRoundWins);
+        } else {
+            File file = new File(getExternalFilesDir(null), filepath);
+            mainController.loadGame(file);
+        }
 
         List<Player> players = mainController.getPlayers();
 
@@ -116,8 +124,6 @@ public class hand extends AppCompatActivity {
         stackSection1RecyclerView.setAdapter(stackAdapter);
         handRecyclerView.setAdapter(handAdapter);
 
-        Log.d("HAND_ACTIVITY", "stackTiles size: " + stackTiles.size());
-        Log.d("HAND_ACTIVITY", "handTiles size: " + handTiles.size());
 
     }
 
@@ -282,10 +288,11 @@ public class hand extends AppCompatActivity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     String filePath = fileNameTXT.getText().toString();
-                    //filePath = "/storage/emulated/0/seralize1.txt";
-                    File file = new File(filePath);
+                    //filePath = "/storage/emulated/0/seralize5.txt";
+                    File file = new File(getExternalFilesDir(null), filePath);
                     if (!file.exists() && !file.isDirectory()) {
-                        mainController.setFileName(filePath);
+                        mainController.setFile(file);
+                        finish();
                         return true;
                     } else {
                         System.out.println("Invalid file path");
@@ -295,5 +302,24 @@ public class hand extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    public void askPlayAgain(String winner, int humanRoundWins, int computerRoundWins) {
+        Intent intent = new Intent(this, playAgain.class);
+        intent.putExtra("humanRoundWins", humanRoundWins);
+        intent.putExtra("computerRoundWins", computerRoundWins);
+        intent.putExtra("winner", winner);
+        startActivity(intent);
+        finish();
+    }
+
+    public void drawRecMove() {
+        hideMessageBoard();
+        showRecMove();
+    }
+
+    public void showpass() {
+        hideRecMove();
+        showMessageBoard();
     }
 }

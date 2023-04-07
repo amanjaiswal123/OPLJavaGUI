@@ -1,6 +1,7 @@
 package com.example.opl3;
 
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ public class Controller{
     private hand activity;
     private String askUserRecMove;
 
-    private String filepath;
+    private File saveFile;
 
 
     public Controller(hand activity){
@@ -26,12 +27,11 @@ public class Controller{
         this.activity = activity;
     }
 
-    public void startGame() {
+    public void startGame(int humanRoundWins, int computerRoundWins) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                tournament.start_new_tournament();
-                // code to handle the result of start_new_tournament() on the new thread
+                tournament.start_new_tournament(humanRoundWins, computerRoundWins);
             }
         });
         thread.start();
@@ -165,8 +165,7 @@ public class Controller{
                 new Runnable() {
                     @Override
                     public void run() {
-                        activity.hideMessageBoard();
-                        activity.showRecMove();
+                        activity.drawRecMove();
                     }
                 }
         );
@@ -203,8 +202,7 @@ public class Controller{
                 new Runnable() {
                     @Override
                     public void run() {
-                        activity.hideRecMove();
-                        activity.showMessageBoard();
+                        activity.showpass();
                     }
                 }
         );
@@ -214,8 +212,20 @@ public class Controller{
         return tournament.getPlayers();
     }
 
-    public void notifyRoundEnd(Map<String, Integer> finalRoundWins) {
-
+    public void notifyRoundEnd(Map<String, Integer> finalRoundWins, String winner) {
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.draw_scores(finalRoundWins, winner+" Wins the Round! ", "Wins ");
+                    }
+                }
+        );
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Player getCurrentPlayer() {
@@ -233,12 +243,12 @@ public class Controller{
         );
     }
 
-    public String getFileName() {
-        return filepath;
+    public File getFile() {
+        return saveFile;
     }
 
-    public void setFileName(String filePath) {
-        filepath = filePath;
+    public void setFile(File file) {
+        saveFile = file;
     }
 
     public void notifyConfirmSave() {
@@ -247,6 +257,59 @@ public class Controller{
                     @Override
                     public void run() {
                         activity.askFileName();
+                    }
+                }
+        );
+    }
+
+    public void loadGame(File file) {
+        tournament = new Tournament(this);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                tournament.load_tournament(file);
+                // code to handle the result of start_new_tournament() on the new thread
+            }
+        });
+        thread.start();
+        while (tournament.getCurrentPlayer() == null){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void notifyGameOver(Map<String, Integer> scores, String winner) {
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.draw_scores(scores, "Tournament Results: ", "Round Wins: ");
+                    }
+                }
+        );
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        int humanRoundWins = 0;
+                        int computerRoundWins = 0;
+                        for (Player player : tournament.getPlayers()) {
+                            if (player.getPlayerID().equals("Human")) {
+                                humanRoundWins = player.getRoundsWon();
+                            }
+                            else{
+                                computerRoundWins = player.getRoundsWon();
+                            }
+                        }
+                        activity.askPlayAgain(winner, humanRoundWins, computerRoundWins);
                     }
                 }
         );
