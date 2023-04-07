@@ -46,7 +46,13 @@ public class playAgain extends AppCompatActivity {
             overall.setBackgroundResource(R.drawable.win);
             winnerTXt.setVisibility(TextView.VISIBLE);
             playAgain.setVisibility(LinearLayout.INVISIBLE);
-            winnerTXt.setText(winner + " won the tournament!");
+
+            if (winner.equals("Tie")) {
+                winnerTXt.setText("Tournament is a Draw!");
+            }
+            else {
+                winnerTXt.setText(winner + " won the tournament!");
+            }
             overall.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

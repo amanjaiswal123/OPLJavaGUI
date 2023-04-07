@@ -617,7 +617,7 @@ public class Tournament  {
             c_boneyard_converted = new ArrayList<>();
             c_stacks_converted = new ArrayList<>();
         }
-        handNum = 4-(humanPlayer.getBoneyard().size()/6);
+        handNum = 4-((humanPlayer.getBoneyard().size()+2)/6);
         if (handNum == 0){
             for (Player c_player : players){
                 c_player.shuffleBoneyard();

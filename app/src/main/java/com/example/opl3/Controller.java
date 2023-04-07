@@ -259,7 +259,7 @@ public class Controller{
                     @Override
                     public void run() {
                         if (winner.equals("Tie")){
-                            activity.draw_scores(finalRoundWins, winner+"Tournament is currently a Draw! ", "Wins ");
+                            activity.draw_scores(finalRoundWins, "Tournament is currently a Draw! ", "Wins ");
                         }
                         else{
                             activity.draw_scores(finalRoundWins, winner+" is leading the Tournament! ", "Wins ");
