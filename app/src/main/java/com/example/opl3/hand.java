@@ -15,6 +15,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -54,12 +55,16 @@ public class hand extends AppCompatActivity {
 
     private LinearLayout buttonContainer;
 
+    private FrameLayout overall_layout;
+    private boolean tap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
 
         setContentView(R.layout.domino_layout); // Change this to the correct layout file for the hand activity
+        overall_layout = findViewById(R.id.overall_layout);
         messageBoard = findViewById(R.id.message_board);
         askYesNo = findViewById(R.id.askYesNo);
         boardDisplay = findViewById(R.id.board_display);
@@ -321,5 +326,20 @@ public class hand extends AppCompatActivity {
     public void showpass() {
         hideRecMove();
         showMessageBoard();
+    }
+
+    public void waitforTap() {
+
+        mainController.resetTap();
+        overall_layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainController.setTap(true);
+            }
+        });
+    }
+
+    public void showCurrentPlayer() {
+        messageBoard.setText("It is " + mainController.getCurrentPlayer().getPlayerID() + "'s turn");
     }
 }

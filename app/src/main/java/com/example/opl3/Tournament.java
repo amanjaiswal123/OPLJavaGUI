@@ -259,6 +259,7 @@ public class Tournament  {
         return scores;
     }
     public void playHand() {
+        boolean first = true;
         int consecutivePasses = 0;
         boolean allEmptyHands = true;
         Tile handTile;
@@ -273,6 +274,10 @@ public class Tournament  {
             for (Player currentPlayer : players) {
                 this.currentPlayer = currentPlayer;
                 mainController.notifyNewTurn();
+                if (first){
+                    mainController.notifyNewHandStart(handNum);
+                    first = false;
+                }
                 System.out.println("Player " + currentPlayer.getPlayerID() + "'s turn:\n");
                 currentPlayer.displayHand();
                 System.out.println();
@@ -300,6 +305,7 @@ public class Tournament  {
                 if (consecutivePasses >= players.size()) {
                     break;
                 }
+                mainController.notifyTurnEnd();
                 mainController.notifySaveGame();
                 mainController.ResetYesNoPrompt();
                 while (mainController.getUserYesNo() == null){
@@ -375,7 +381,18 @@ public class Tournament  {
             System.out.println("Player " + currentPlayer.getPlayerID() + ": " + currentPlayer.getScore());
             currentPlayer.getHand().clear();
         }
-        mainController.notifyHandEnd(finalScores);
+        String winner;
+        if (finalScores.get("Human") > finalScores.get("Computer")) {
+            System.out.println("Player Human wins the hand!");
+            winner = "Human";
+        } else if (finalScores.get("Human") < finalScores.get("Computer")) {
+            System.out.println("Player Computer wins the hand!");
+            winner = "Computer";
+        } else {
+            System.out.println("The hand is a tie!");
+            winner = "Tie";
+        }
+        mainController.notifyHandEnd(finalScores, winner);
     }
 
     public static boolean isFileTaken(String filePath) {

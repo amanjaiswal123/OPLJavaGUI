@@ -18,6 +18,17 @@ public class computerPlayer extends Player {
             return recMove;
         }
         System.out.println("\nThe Computer Chose to Play " + recMove.get(0) + " on " + recMove.get(1) + " because it has a difference of " + recMove.get(2) + " which is the lowest difference move on an opponent's stack.");
+        String message;
+        if (recMove.get(0).equals("pass")) {
+            message = "There are no valid moves. Therefore the computer passed.";
+            System.out.println(message);
+            mainController.notifyReciviedRecMove(message);
+        }
+        else {
+            message = "The Computer chose " + recMove.get(0) + " on " + recMove.get(1) + " because it has a difference of " + recMove.get(2) + " which is the lowest difference move on an opponent's stack.";
+            System.out.println(message);
+            mainController.notifyReciviedRecMove(message);
+        }
         return recMove;
     }
 

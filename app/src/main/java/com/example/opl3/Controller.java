@@ -16,6 +16,7 @@ public class Controller{
     private String askUserRecMove;
 
     private File saveFile;
+    private boolean tap;
 
 
     public Controller(hand activity){
@@ -82,6 +83,15 @@ public class Controller{
         if (activity == null){
             return;
         }
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.showCurrentPlayer();
+                    }
+                }
+        );
+        waitforTap();
         List<Tile> stackTiles = new ArrayList<>();
         for (Player player : tournament.getPlayers()) {
             for (Tile tile : player.getStack()) {
@@ -103,15 +113,18 @@ public class Controller{
                 throw new RuntimeException(e);
             }
         }
+
+
         activity.getStackAdapter().setTiles(stackTiles);
         activity.getHandAdapter().setTiles(handTiles);
         activity.runOnUiThread(
                 new Runnable() {
                     @Override
                     public void run() {
+                        activity.clearMessageBoard();
+
                         activity.showBoardDisplay();
                         activity.hideScoreDisplay();
-                        activity.clearMessageBoard();
                         activity.getStackAdapter().notifyDataSetChanged();
                         activity.getHandAdapter().notifyDataSetChanged();
                     }
@@ -119,23 +132,50 @@ public class Controller{
         );
     }
     public void notifyHandChange() {
-        activity.setMessageBoard("Hand " + String.valueOf(tournament.getHandNum()) + " of " + 4);
-    }
-
-    public void notifyHandEnd(Map<String, Integer> finalScores) {
         activity.runOnUiThread(
                 new Runnable() {
                     @Override
                     public void run() {
-                        activity.draw_scores(finalScores, "Current Round Scores: ", "Score ");
+                        activity.setMessageBoard("Hand " + String.valueOf(tournament.getHandNum()) + " of " + 4);
                     }
                 }
         );
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+    }
+
+    public void waitforTap(){
+        tap = false;
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.waitforTap();
+                    }
+                }
+        );
+        while (!tap){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
+    }
+
+    public void notifyHandEnd(Map<String, Integer> finalScores, String winner) {
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        if (winner.equals("Tie")){
+                            activity.draw_scores(finalScores, winner+"Hand is a Draw! ", "Score ");
+                        }
+                        else{
+                            activity.draw_scores(finalScores, winner+" has won the Hand! ", "Score ");
+                        }
+                    }
+                }
+        );
+        waitforTap();
     }
 
     public void ResetYesNoPrompt() {
@@ -183,6 +223,7 @@ public class Controller{
                     }
                 }
         );
+        waitforTap();
     }
 
     public void notifyaskPass() {
@@ -217,15 +258,16 @@ public class Controller{
                 new Runnable() {
                     @Override
                     public void run() {
-                        activity.draw_scores(finalRoundWins, winner+" Wins the Round! ", "Wins ");
+                        if (winner.equals("Tie")){
+                            activity.draw_scores(finalRoundWins, winner+"Tournament is currently a Draw! ", "Wins ");
+                        }
+                        else{
+                            activity.draw_scores(finalRoundWins, winner+" is leading the Tournament! ", "Wins ");
+                        }
                     }
                 }
         );
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        waitforTap();
     }
 
     public Player getCurrentPlayer() {
@@ -286,19 +328,6 @@ public class Controller{
                 new Runnable() {
                     @Override
                     public void run() {
-                        activity.draw_scores(scores, "Tournament Results: ", "Round Wins: ");
-                    }
-                }
-        );
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        activity.runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
                         int humanRoundWins = 0;
                         int computerRoundWins = 0;
                         for (Player player : tournament.getPlayers()) {
@@ -310,6 +339,79 @@ public class Controller{
                             }
                         }
                         activity.askPlayAgain(winner, humanRoundWins, computerRoundWins);
+                    }
+                }
+        );
+    }
+
+    public void resetTap() {
+        this.tap = false;
+    }
+
+    public void setTap(boolean b) {
+        this.tap = b;
+    }
+
+    public void notifyTurnEnd() {
+        if (activity == null){
+            return;
+        }
+        List<Tile> stackTiles = new ArrayList<>();
+        for (Player player : tournament.getPlayers()) {
+            for (Tile tile : player.getStack()) {
+                stackTiles.add(tile);
+            }
+        }
+
+        List<Tile> handTiles = new ArrayList<>();
+        Player cPlayer = tournament.getCurrentPlayer();
+        for (Tile tile : cPlayer.getHand()) {
+            handTiles.add(tile);
+        }
+
+
+        while (activity.getStackAdapter() == null){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+        activity.getStackAdapter().setTiles(stackTiles);
+        activity.getHandAdapter().setTiles(handTiles);
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.showBoardDisplay();
+                        activity.hideScoreDisplay();
+                        activity.getStackAdapter().notifyDataSetChanged();
+                        activity.getHandAdapter().notifyDataSetChanged();
+                    }
+                }
+        );
+    }
+
+    public void notifyNewHandStart(int handNum) {
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.hideRecMove();
+                        activity.showMessageBoard();
+                        String message = "Hand " + String.valueOf(handNum) + " of 4 has started!";
+                        activity.setMessageBoard(message);
+                    }
+                }
+        );
+        waitforTap();
+        activity.runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.clearMessageBoard();
                     }
                 }
         );
