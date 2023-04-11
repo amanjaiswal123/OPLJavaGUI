@@ -7,17 +7,13 @@ import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 
-public class Tile implements Parcelable {
-    // The tile class stores the value of the left and right side of a tile as well as overriding some basic operators
-    // to make it easier to work with. It takes in DisplayTile which adds attributes and methods to the tile class to
-    // make it easier to display it on the game board.
+public class Tile {
 
-    private int left;
-    private int right;
-    private Player player;
-    private boolean selected;
-    private boolean doubleTile;
-
+    /* *********************************************************************
+    Class Name: Tile
+    Purpose: To represent a tile object with left and right side values, a player owner,
+             and methods to manipulate and compare tiles in a game.
+    ********************************************************************* */
     public Tile(int left, int right, Player player) {
         super();
         // The left and right attributes store the value of the left and right side of the tile
@@ -28,26 +24,6 @@ public class Tile implements Parcelable {
         // If both sides of the tile are the same, the tile is a double
         this.doubleTile = this.left == this.right;
     }
-
-    protected Tile(Parcel in) {
-        left = in.readInt();
-        right = in.readInt();
-        selected = in.readByte() != 0;
-        doubleTile = in.readByte() != 0;
-    }
-
-    public static final Creator<Tile> CREATOR = new Creator<Tile>() {
-        @Override
-        public Tile createFromParcel(Parcel in) {
-            return new Tile(in);
-        }
-
-        @Override
-        public Tile[] newArray(int size) {
-            return new Tile[size];
-        }
-    };
-
     public void setSelected(boolean selected) {
         this.selected = selected;
     }
@@ -95,19 +71,6 @@ public class Tile implements Parcelable {
         return result;
     }
 
-    public int indexOf(Object o) {
-        if (!(o instanceof Tile)) {
-            return -1;
-        }
-        Tile otherTile = (Tile) o;
-        for (int i = 0; i < player.getHand().size(); i++) {
-            Tile tile = player.getHand().get(i);
-            if (tile.toString().equals(otherTile.toString())) {
-                return i;
-            }
-        }
-        return -1;
-    }
 
 
     public boolean equals(Tile obj) {
@@ -128,31 +91,22 @@ public class Tile implements Parcelable {
         return this.player;
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            // do any necessary cleanup here
-            // for example, release any external resources
-        } finally {
-            super.finalize();
-        }
-    }
+
 
     public Object getColor() {
         return this.player.getColor();
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+    //The left and right attributes store the value of the left and right side of the tile
+    private int left;
+    private int right;
 
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(this.left);
-        dest.writeInt(this.right);
-        //dest.writeParcelable(this.player, flags);
-        dest.writeByte(this.selected ? (byte) 1 : (byte) 0);
-        dest.writeByte(this.doubleTile ? (byte) 1 : (byte) 0);
-    }
+    //The player attribute stores the player object that owns the tile, useful for scoring
+    private Player player;
+
+    //If this tile is selected or not
+    private boolean selected;
+
+    //If both sides of the tile are the same, the tile is a double
+    private boolean doubleTile;
 }

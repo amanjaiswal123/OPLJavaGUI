@@ -39,6 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:textSize="36dp"
             android:gravity="center"
             android:text="Would like to load the game?"
             android:textAppearance="?attr/textAppearanceHeadline6"
@@ -84,23 +85,17 @@
             android:id="@+id/loadGame"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Please Enter a File Path: "
-                android:textSize="18sp"
-                android:textColor="@android:color/black" />
 
-            <EditText
+
+
+
+            <Spinner
                 android:id="@+id/fileName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Enter file path here"
-                android:textColor="@android:color/black"
-                android:background="@android:color/white"
-                android:inputType="text" />
+                android:background="@android:color/white"/>
+
 
             <TextView
                 android:id="@+id/invalidpath"

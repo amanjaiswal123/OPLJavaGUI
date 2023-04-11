@@ -13,22 +13,15 @@ public class computerPlayer extends Player {
 
     @Override
     public List<Object> getValidMove(List<Player> players, List<Object> recMove, Controller mainController) {
-        if (recMove.get(0).equals("pass")) {
-            System.out.println("\nThe Computer Chose to Pass because there are no Valid Moves.");
-            return recMove;
-        }
-        System.out.println("\nThe Computer Chose to Play " + recMove.get(0) + " on " + recMove.get(1) + " because it has a difference of " + recMove.get(2) + " which is the lowest difference move on an opponent's stack.");
         String message;
         if (recMove.get(0).equals("pass")) {
             message = "There are no valid moves. Therefore the computer passed.";
-            System.out.println(message);
-            mainController.notifyReciviedRecMove(message);
         }
         else {
             message = "The Computer chose " + recMove.get(0) + " on " + recMove.get(1) + " because it has a difference of " + recMove.get(2) + " which is the lowest difference move on an opponent's stack.";
-            System.out.println(message);
-            mainController.notifyReciviedRecMove(message);
         }
+        System.out.println(message);
+        mainController.notifyReciviedRecMove(message);
         return recMove;
     }
 
@@ -56,23 +49,4 @@ public class computerPlayer extends Player {
         return string;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        List<Tile> stack = getStack();
-        Parcelable[] parcelableArray = stack.toArray(new Parcelable[stack.size()]);
-        dest.writeParcelableArray(parcelableArray, flags);
-        List <Tile> boneyard = getBoneyard();
-        Parcelable[] parcelableArray2 = boneyard.toArray(new Parcelable[boneyard.size()]);
-        dest.writeParcelableArray(parcelableArray2, flags);
-        List <Tile> hand = getHand();
-        Parcelable[] parcelableArray3 = hand.toArray(new Parcelable[hand.size()]);
-        dest.writeParcelableArray(parcelableArray3, flags);
-        dest.writeInt(getScore());
-        dest.writeInt(getRoundsWon());
-    }
 }
